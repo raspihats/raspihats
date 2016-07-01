@@ -16,6 +16,6 @@ setup(
     author_email='hardhat@raspihats.com',
     url='https://www.raspihats.com/',
     license=open('LICENSE').read(),
-    long_description=open('README').read(),
+    long_description=open('README.md').read(),
     # ext_modules = [set_module]
 )
