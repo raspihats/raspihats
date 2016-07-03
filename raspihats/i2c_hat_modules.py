@@ -1,12 +1,16 @@
 """
 This module contains the I2CHat base class and extensions.
 """
+import sys
 import time
 import smbus
 import threading
-import Queue
-import commands
-from i2c_frame import I2CFrame
+from .i2c_frame import I2CFrame
+is_py2 = sys.version[0] == '2'
+if is_py2:
+    import Queue as queue
+else:
+    import queue as queue
 
 # General Board Commands
 CMD_GET_BOARD_NAME = 0x10
@@ -84,8 +88,8 @@ class I2CHat(threading.Thread):
             if actual_board_name not in board_name:
                 raise Exception("Unexpected board name: " + actual_board_name + ", expecting: " + board_name)
         
-        self.cmd_queue = Queue.Queue()
-        self.ex_queue = Queue.Queue()
+        self.cmd_queue = queue.Queue()
+        self.ex_queue = queue.Queue()
         
     def __str__(self):
         """Returns the string representation."""
@@ -286,7 +290,7 @@ class I2CHat(threading.Thread):
                     run_flag = False
                 if 'update' in cmd:
                     feed_period = 0 # this forces a read/update of the CWDT period
-            except Queue.Empty:
+            except queue.Empty:
                 pass
             
     def cwdt_start_feed_thread(self, period=4):

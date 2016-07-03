@@ -1,7 +1,7 @@
 """
 This module contains the I2CFrame class and related classes.
 """
-import crc16
+from .crc16 import calc
 
 
 class I2CFrameDecodeException(Exception):
@@ -96,7 +96,7 @@ class I2CFrame(object):
             
         """
         data = [self.fid, self.cmd] + self.data
-        crc = crc16.calc(data) 
+        crc = calc(data) 
         return data + [(crc & 0xFF), ((crc >> 8) & 0xFF)]
     
     def decode(self, data):
@@ -111,7 +111,7 @@ class I2CFrame(object):
             
         """
         self.__check_uint8__(data)
-        crc = crc16.calc(data[:-2])
+        crc = calc(data[:-2])
         if crc != (data[-1] << 8) + data[-2]:
             raise I2CFrameDecodeException('Crc check failed')
         if self.fid != data[0]:

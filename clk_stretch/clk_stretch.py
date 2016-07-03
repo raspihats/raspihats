@@ -41,7 +41,7 @@ def rpi_clk_stretch_timeout(clk_stretch_timeout, baudrate):
             break
         
     if not rc_local_updated:
-        print "Failed to update rc.local!!!"
+        print ("Failed to update rc.local!!!")
     
     # return pointer to top of file so we can re-write the content with replaced string
     f.seek(0)
