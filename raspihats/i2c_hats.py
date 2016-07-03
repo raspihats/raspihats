@@ -1,7 +1,7 @@
 """
 This module contains the I2CHats classes.
 """
-from i2c_hat_modules import DigitalInputs, DigitalOutputs
+from .i2c_hat_modules import DigitalInputs, DigitalOutputs
 
 class Di16(DigitalInputs):
     """This class exposes all operations supported by the Rly10 I2C-HAT, it inherits functionality from DigitalInputs class."""

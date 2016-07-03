@@ -1,12 +1,12 @@
-import setuptools
+# import setuptools
 import sys
 import os
 from distutils.core import setup
 
 if "install" in sys.argv:
-    os.chdir('clk_stretch')
-    execfile('clk_stretch.py')
-    os.chdir('..')
+    os.chdir("clk_stretch")
+    exec(open("clk_stretch.py").read())
+    os.chdir("..")
 
 setup(
     name='raspihats',
