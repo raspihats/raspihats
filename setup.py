@@ -1,3 +1,4 @@
+import setuptools
 import sys
 import os
 from distutils.core import setup
@@ -17,5 +18,5 @@ setup(
     url='https://www.raspihats.com/',
     license=open('LICENSE').read(),
     long_description=open('README.md').read(),
-    # ext_modules = [set_module]
+    # install_requires=['smbus-cffi'],
 )
