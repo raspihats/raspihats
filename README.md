@@ -1,6 +1,6 @@
 # raspihats package
 
-This package provides the necessary code to interface the Raspberry Pi HATs(addon boards) from [**raspihats.com**](http://www.raspihats.com/)
+This package provides the necessary code to interface the Raspberry Pi HATs(addon boards) from [**raspihats.com**](http://www.raspihats.com/).
 
 
 Typical usage often looks like this:
@@ -24,8 +24,8 @@ Typical usage often looks like this:
 Every **I2CHat** object is practically a thread, this thread is used to feed the communication watchdog(CWDT). Failing to feed the CWDT will result in a CWDT timeout which depending on the I2CHat type can have different consequences.
 By default the CWDT is disabled and the feed thread is not started, advanced users can enable both using the _cwdt_start_feed_thread()_.
 
-## Instalation:
-### Dependencies
+## Installation:
+### Install dependencies
 The python-smbus package
 ```sh
 $ sudo apt-get install python-smbus
@@ -33,7 +33,7 @@ $ sudo apt-get install python-smbus
 $ sudo apt-get install python3-smbus
 ```
 
-### From repository
+### Install from repository
 ```sh
 $ git clone git@github.com:raspihats/raspihats.git
 $ cd raspihats
@@ -42,11 +42,11 @@ $ sudo python setup.py install
 $ sudo python3 setup.py install
 ```
 
-### Using pip
+### Install using pip
 ```sh
 $ sudo pip install raspihats
 # or if using python 3
 $ sudo pip3 install raspihats
 ```
 
-Checkout http://www.raspihats.com/
+Checkout [**raspihats.com**](http://www.raspihats.com/)
