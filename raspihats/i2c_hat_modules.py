@@ -47,7 +47,11 @@ class I2CHat(threading.Thread):
     """Implements basic functionality common to all I2C-HATs."""
         
     i2c_bus_lock = threading.Lock()
-    
+    try:
+        i2c_bus = smbus.SMBus(1)     # default for Raspberry Pi
+    except:
+        i2c_bus = None
+
     @staticmethod
     def set_i2c_port(i2c_port):
         """Set the I2C port number.
@@ -72,9 +76,6 @@ class I2CHat(threading.Thread):
         """
     
         threading.Thread.__init__(self)
-        
-        if I2CHat.i2c_bus == None:
-            I2CHat.i2c_bus = smbus.SMBus(1)     # default for Raspberry Pi
         
         if base_address == None:
             if not 0 <= address <= 127:
