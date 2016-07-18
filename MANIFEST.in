@@ -1,2 +1,2 @@
-include LICENSE README.md
+include LICENSE README.rst
 recursive-include clk_stretch *
