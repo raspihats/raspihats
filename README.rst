@@ -26,7 +26,7 @@ Note
 -----
 
 Every **I2CHat** object is practically a thread, this thread is used to feed the communication watchdog(CWDT). Failing to feed the CWDT will result in a CWDT timeout which depending on the I2CHat type can have different consequences.
-By default the CWDT is disabled and the feed thread is not started, advanced users can enable both using the _cwdt_start_feed_thread()_.
+By default the CWDT is disabled and the feed thread is not started, advanced users can enable both using the *cwdt_start_feed_thread()*.
 
 Installation
 ------------
