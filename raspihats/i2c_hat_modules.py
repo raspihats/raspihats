@@ -50,6 +50,7 @@ class I2CHat(threading.Thread):
     try:
         i2c_bus = smbus.SMBus(1)     # default for Raspberry Pi
     except:
+        print("I2C port not found!")
         i2c_bus = None
 
     @staticmethod
@@ -99,6 +100,23 @@ class I2CHat(threading.Thread):
         """Returns the string representation."""
         
         return self.get_board_name() + " adr: " + hex(self.address)
+    
+    def __lower_case_labels__(self, labels):
+        """Lower case labels.
+        
+        Args:
+            list: labels
+        
+        Returns:
+            list: The lower case labels
+            
+        """
+        
+        lower_case_labels = []
+        for label in labels:
+            lower_case_labels.append(label.lower())
+        
+        return lower_case_labels
 
     def _generate_frame_id_(self):
         """Generate new frame Id, increments current frame Id, wraps to 0xFF.
@@ -110,7 +128,6 @@ class I2CHat(threading.Thread):
         self.frame_id += 1
         self.frame_id &= 0xFF
         return self.frame_id
-
     
     def _transfer_(self, _request_frame_, response_data_size, response_expected = True, number_of_tries = 5):
         """Tries a number of times to send a request frame and to get a response frame over I2C bus.
@@ -388,7 +405,7 @@ class DigitalInputs(I2CHat):
             return channel
         elif isinstance(channel, str):
             try:
-                return map(str.lower, self.__di_channel_labels__).index(channel.lower())
+                return self.__lower_case_labels__(self.__di_channel_labels__).index(channel.lower())
             except ValueError:    
                 raise ValueError('invalid channel label')
         else:
@@ -587,7 +604,7 @@ class DigitalOutputs(I2CHat):
             return channel
         elif isinstance(channel, str):
             try:
-                return map(str.lower, self.__do_channel_labels__).index(channel.lower())
+                return self.__lower_case_labels__(self.__do_channel_labels__).index(channel.lower())
             except ValueError:    
                 raise ValueError('invalid channel label')
         else:
@@ -644,7 +661,7 @@ class DigitalOutputs(I2CHat):
             self.__do_check_compact_value__(value)
         elif isinstance(value, dict):
             value = {k.lower():v for k,v in value.items()}  # lower case for input dict keys
-            expected_labels = map(str.lower, list(self.__do_channel_labels__)).sort()
+            expected_labels = self.__lower_case_labels__(self.__do_channel_labels__).sort()
             labels = value.keys().sort()
             if labels == expected_labels:
                 states = value
