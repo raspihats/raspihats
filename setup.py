@@ -1,5 +1,5 @@
 from sys import argv
-from os import chdir
+from os import chdir, getcwd, system
 from setuptools import setup
 from setuptools.command.install import install
 
@@ -7,18 +7,19 @@ from setuptools.command.install import install
 # Build and install the clock stretch timeout script automatically during setup
 class ClockStretchTimeoutInstall(install):
     def run(self):
+        cwd = getcwd()
         try:
-            chdir("clk_stretch")
-            exec(open("clk_stretch.py").read())
-            chdir("..")
+            chdir("clk_stretch/")
+            system("python clk_stretch.py")
         except Exception as e:
             print ("Warning: clock stretch timeout setup failed! " + str(e))
         finally:
+            chdir(cwd)
             install.run(self) 
 
 setup(
     name             = 'raspihats',   
-    version          = '1.0.0',
+    version          = '1.1.0',
     description      = 'package for controlling raspihats.com boards',
     long_description = open('README.rst').read(),
     license          = open('LICENSE').read(),

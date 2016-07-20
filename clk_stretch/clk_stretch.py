@@ -1,5 +1,6 @@
 from subprocess import call
-import platform
+from platform import system, linux_distribution
+
 
 def rpi_clk_stretch_timeout(clk_stretch_timeout, baudrate):
     dest_path = '/usr/local/bin/'
@@ -56,9 +57,8 @@ def main():
     RASPBERRY_PI = 'raspberry-pi'
     
     PLATFORM = 'Unknown'
-    SYSTEM = platform.system().lower()
-    if SYSTEM == 'linux':
-        if platform.linux_distribution()[0].lower() == 'debian':
+    if system().lower() == 'linux':
+        if linux_distribution()[0].lower() == 'debian':
             try:
                 with open('/proc/cpuinfo') as f:
                     for line in f:
