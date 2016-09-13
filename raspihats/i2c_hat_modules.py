@@ -40,10 +40,56 @@ CMD_DO_GET_ALL_CHANNEL_STATES = 0x35
 CMD_DO_SET_CHANNEL_STATE = 0x36
 CMD_DO_GET_CHANNEL_STATE = 0x37
 
+class CwdtFeedThread(threading.Thread):
+    """Implements basic functionality common to all I2C-HATs."""
+    
+    def __init__(self):
+        threading.Thread.__init__(self)
+        self.cmd_queue = queue.Queue()
+        self.ex_queue = queue.Queue()
+    
+    def stop(self):
+        """Send command to stop the thread that is feeding the CommunicationWatchdogTimer."""
+        self.cmd_queue.put('stop')
+        
+    def update(self):
+        """Send command to thread to update it's copy of CommunicationWatchdogTimer period."""
+        self.cmd_queue.put('update')
+    
+    def run(self):
+        """Feeds the CommunicationWatchdogTimer."""
+        
+        # clear queue
+        while not self.cmd_queue.empty():
+            self.cmd_queue.get()
+        
+        run_flag = True
+        feed_period = 0.0
+        feed_time = 0.0
+        while run_flag:
+            if time.time() - feed_time > feed_period:
+                try:
+                    # feed CWDT and read period
+                    feed_time = time.time()
+                    feed_period = self.get_cwdt_period() * 0.5
+                except Exception as e:
+                    # communication lost
+                    self.ex_queue.put(e)
+                    run_flag = False
+            try:
+                # start_time = time.time()
+                cmd = self.cmd_queue.get(block=True, timeout=0.01)
+                if 'stop' in cmd:
+                    run_flag = False
+                if 'update' in cmd:
+                    feed_period = 0 # this forces a read/update of the CWDT period
+            except queue.Empty:
+                pass
+
 class I2CHatResponseException(Exception):
     """Raised when there's a problem with the I2C-HAT response."""
 
-class I2CHat(threading.Thread):
+class I2CHat(object):
     """Implements basic functionality common to all I2C-HATs."""
         
     i2c_bus_lock = threading.Lock()
@@ -75,8 +121,6 @@ class I2CHat(threading.Thread):
             ValueError: If address is not in range
             
         """
-    
-        threading.Thread.__init__(self)
         
         if base_address == None:
             if not 0 <= address <= 127:
@@ -92,9 +136,8 @@ class I2CHat(threading.Thread):
             actual_board_name = self.get_board_name()
             if actual_board_name not in board_name:
                 raise Exception("Unexpected board name: " + actual_board_name + ", expecting: " + board_name)
-        
-        self.cmd_queue = queue.Queue()
-        self.ex_queue = queue.Queue()
+            
+        self.cwdt_feed_thread = CwdtFeedThread()
         
     def __str__(self):
         """Returns the string representation."""
@@ -283,36 +326,6 @@ class I2CHat(threading.Thread):
         """Send a request over the I2C bus to reset the I2C-HAT."""
         request = self._request_frame_(CMD_RESET)
         self._transfer_(request, 0, False)
-        
-    def run(self):
-        """This thread feeds the CommunicationWatchdogTimer."""
-        
-        # clear queue
-        while not self.cmd_queue.empty():
-            self.cmd_queue.get()
-        
-        run_flag = True
-        feed_period = 0.0
-        feed_time = 0.0
-        while run_flag:
-            if time.time() - feed_time > feed_period:
-                try:
-                    # feed CWDT and read period
-                    feed_time = time.time()
-                    feed_period = self.get_cwdt_period() * 0.5
-                except Exception as e:
-                    # communication lost
-                    self.ex_queue.put(e)
-                    run_flag = False
-            try:
-                # start_time = time.time()
-                cmd = self.cmd_queue.get(block=True, timeout=0.01)
-                if 'stop' in cmd:
-                    run_flag = False
-                if 'update' in cmd:
-                    feed_period = 0 # this forces a read/update of the CWDT period
-            except queue.Empty:
-                pass
             
     def cwdt_start_feed_thread(self, period=4):
         """Starts the CommunicationWatchdogTimer feed thread and sets the I2C-HAT board CommunicationWatchdogTimer period.
@@ -333,12 +346,7 @@ class I2CHat(threading.Thread):
         """Sends comand to stop the CommunicationWatchdogTimer feed thread disables it."""
         
         self.set_cwdt_period(0)
-        self.cmd_queue.put('stop')
-    
-    def cwdt_is_feed_thread_running(self):
-        """Gets running status of the CommunicationWatchdogTimer feed thread."""
-        
-        return self.ex_queue.empty()
+        self.cwdt_feed_thread.stop()
 
     def cwdt_get_period(self):
         """Sends a request over the I2C bus to get the CommunicationWatchdogTimer(CWDT) period.
@@ -358,7 +366,7 @@ class I2CHat(threading.Thread):
         
         """
         self._set_u32_value_(CMD_CWDT_SET_PERIOD, int(value * 1000))
-        self.cmd_queue.put('update') # command for CWDT thread to update/read the CWDT period
+        self.cwdt_feed_thread.update() # command for CWDT thread to update/read the CWDT period
         
 class DigitalInputs(I2CHat):
     """Extends the basic functionality by adding the required attributes and methods needed for operating the digital inputs channels.
