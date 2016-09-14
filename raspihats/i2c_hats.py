@@ -1,7 +1,8 @@
 """
 This module contains the I2CHats classes.
 """
-from .i2c_hat_modules import DigitalInputs, DigitalOutputs
+from .i2c_hat_modules import I2CHat, DigitalInputs, DigitalOutputs
+import digital
 
 class Di16(DigitalInputs):
     """This class exposes all operations supported by the Rly10 I2C-HAT, it inherits functionality from DigitalInputs class."""
@@ -47,6 +48,28 @@ class Rly10(DigitalOutputs):
                         
         """
         DigitalOutputs.__init__(self, self.__labels__, address, Rly10.BASE_ADDRESS, Rly10.BOARD_NAME)
+        
+class Rly10Test(I2CHat):
+    """This class exposes all operations supported by the Rly10 I2C-HAT, it inherits functionality from DigitalOutputs class."""
+    
+    BASE_ADDRESS = 0x50
+    """I2C start address for Di16 I2C-HATs, valid range is [0x50 .. 0x5F]."""
+    
+    BOARD_NAME = "Rly10 I2C-HAT"
+    """Expected board name response for the get_board_name() method."""
+    
+    __labels__ = ['Rly1', 'Rly2', 'Rly3', 'Rly4', 'Rly5', 'Rly6', 'Rly7', 'Rly8', 'Rly9', 'Rly10']
+    
+    def __init__(self, address):
+        """Construct a Rly10 object, setting the I2C port and I2C-HAT address.
+        
+        Args:
+            address(int): I2C address, valid range is [0x50, 0x5F]
+                        
+        """
+        I2CHat.__init__(self, address, self.BASE_ADDRESS, self.BOARD_NAME)
+        self.do = digital.DigitalOutputs(self.__labels__, self)
+ 
 
 class Di6Rly6(DigitalInputs, DigitalOutputs):
     """This class exposes all operations supported by the Di6Rly6 I2C-HAT, it inherits functionality from DigitalInputs and DigitalOutputs classes."""
