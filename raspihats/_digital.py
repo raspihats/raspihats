@@ -31,7 +31,7 @@ class DigitalInputs(I2CHatModule):
                 index = outer_instance._validate_channel_index(index)
                 request = outer_instance._i2c_hat._request_frame_(Command.DI_GET_CHANNEL_STATE, [index])
                 response = outer_instance._i2c_hat._transfer_(request, 2)
-                data = response.get_data()
+                data = response.data
                 if len(data) != 2 or data[0] != index:
                     raise I2CHatResponseException('unexpected format')
                 return data[1] > 0
@@ -44,7 +44,7 @@ class DigitalInputs(I2CHatModule):
                 index = outer_instance._validate_channel_index(index)
                 request = outer_instance._i2c_hat._request_frame_(Command.DI_GET_COUNTER, [index, self.__counter_type])
                 response = outer_instance._i2c_hat._transfer_(request, 6)
-                data = response.get_data()
+                data = response.data
                 if (len(data) != 1 + 1 + 4) or (index != data[0]) or (self.__counter_type != data[1]):
                     raise I2CHatResponseException('unexpected format')
                 return data[2] + (data[3] << 8) + (data[4] << 16) + (data[5] << 24)
@@ -53,10 +53,10 @@ class DigitalInputs(I2CHatModule):
                 index = outer_instance._validate_channel_index(index)
                 if value != 0:
                     raise ValueError("only '0' is valid, it will reset the counter")
-                request = outer_instance._request_frame_(CMD_DI_RESET_COUNTER, [index, counter_type])
+                request = outer_instance._i2c_hat._request_frame_(Command.DI_RESET_COUNTER, [index, self.__counter_type])
                 response = outer_instance._i2c_hat._transfer_(request, 2)
-                data = response.get_data()
-                if (len(data) != 2) or (index != data[0]) or (counter_type != data[1]):
+                data = response.data
+                if (len(data) != 2) or (index != data[0]) or (self.__counter_type != data[1]):
                     raise I2CHatResponseException('unexpected format')
                 
         self.channel = Channel()
@@ -65,9 +65,9 @@ class DigitalInputs(I2CHatModule):
     
     @property
     def value(self):
-        return self._i2c_hat._get_u32_value_(CMD_DI_GET_ALL_CHANNEL_STATES)
+        return self._i2c_hat._get_u32_value_(Command.DI_GET_ALL_CHANNEL_STATES)
     
-    def reset_all_counters(self):
+    def reset_counters(self):
         """Send a I2C request request to reset all digital input channel counters of all types(falling and
         rising edge).
         
@@ -75,14 +75,14 @@ class DigitalInputs(I2CHatModule):
             I2CHatResponseException: If the response hasn't got the expected format
         
         """
-        request = self._request_frame_(CMD_DI_RESET_ALL_COUNTERS)
-        response = self._transfer_(request, 0)
-        data = response.get_data()
+        request = self._i2c_hat._request_frame_(Command.DI_RESET_ALL_COUNTERS)
+        response = self._i2c_hat._transfer_(request, 0)
+        data = response.data
         if len(data) != 0:
             raise I2CHatResponseException('unexpected format')
 
 
-class DigitalOutputs(object):
+class DigitalOutputs(I2CHatModule):
     """Extends the basic functionality by adding the required attributes and methods needed for operating
     the digital outputs channels.
     
@@ -102,50 +102,50 @@ class DigitalOutputs(object):
             channel_labels (List[str]): Labels of digital input channels
 
         """
-        I2CHatModule.__init__(i2c_hat, labels)
+        I2CHatModule.__init__(self, i2c_hat, labels)
         outer_instance = self
         
         class Channel(object):
             def __getitem__(self, index):
-                outer_instance._validate_channel_index(index)
-                request = outer_instance._i2c_hat._request_frame_(CMD_DO_GET_CHANNEL_STATE, [index])
+                index = outer_instance._validate_channel_index(index)
+                request = outer_instance._i2c_hat._request_frame_(Command.DO_GET_CHANNEL_STATE, [index])
                 response = outer_instance._i2c_hat._transfer_(request, 2)
-                data = response.get_data()
+                data = response.data
                 if len(data) != 2 or data[0] != index:
                     raise I2CHatResponseException('unexpected format')
                 return data[1] > 0
             
             def __setitem__(self, index, value):
-                outer_instance._validate_channel_index(index)
+                index = outer_instance._validate_channel_index(index)
                 data = [index, int(value)]
-                request = outer_instance._i2c_hat._request_frame_(CMD_DO_SET_CHANNEL_STATE, data)
+                request = outer_instance._i2c_hat._request_frame_(Command.DO_SET_CHANNEL_STATE, data)
                 response = outer_instance._i2c_hat._transfer_(request, 2)
-                if data != response.get_data():
+                if data != response.data:
                     raise I2CHatResponseException('unexpected format')
         
         self.channel = Channel()
         
     @property
     def power_on_value(self):
-        return self._i2c_hat._get_u32_value_(CMD_DO_GET_POWER_ON_VALUE)
+        return self._i2c_hat._get_u32_value_(Command.DO_GET_POWER_ON_VALUE)
 
     @power_on_value.setter
     def power_on_value(self, value):
-        self._i2c_hat._set_u32_value_(CMD_DO_SET_POWER_ON_VALUE, value)
+        self._i2c_hat._set_u32_value_(Command.DO_SET_POWER_ON_VALUE, value)
 
     @property
     def safety_value(self):
-        return self._i2c_hat._get_u32_value_(CMD_DO_GET_SAFETY_VALUE)
+        return self._i2c_hat._get_u32_value_(Command.DO_GET_SAFETY_VALUE)
 
     @safety_value.setter
     def safety_value(self, value):
-        self._i2c_hat._set_u32_value_(CMD_DO_SET_SAFETY_VALUE, value)
+        self._i2c_hat._set_u32_value_(Command.DO_SET_SAFETY_VALUE, value)
 
     @property
     def value(self):
-        return self._i2c_hat._get_u32_value_(CMD_DO_GET_ALL_CHANNEL_STATES)
+        return self._i2c_hat._get_u32_value_(Command.DO_GET_ALL_CHANNEL_STATES)
 
     @value.setter
     def value(self, value):
-        self._i2c_hat._set_u32_value_(CMD_DO_SET_ALL_CHANNEL_STATES, value)
+        self._i2c_hat._set_u32_value_(Command.DO_SET_ALL_CHANNEL_STATES, value)
         

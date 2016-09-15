@@ -90,10 +90,8 @@ class I2CHat(object):
         self.__frame_id = 0x1F - 1
         
         if board_name != None:
-            actual_board_name = self.get_board_name()
-            if actual_board_name not in board_name:
-                raise Exception("Unexpected board name: " + actual_board_name + ", expecting: " + board_name)
-
+            if self.name not in board_name:
+                raise Exception("Unexpected board name: " + self.name + ", expecting: " + board_name)
         
     def __str__(self):
         """Returns the string representation."""
@@ -144,7 +142,7 @@ class I2CHat(object):
                     # NOTE: read_i2c_block_data function sends a i2c_write first, this write has a length of one, and the dummy_byte as payload, this
                     # write will be ignored by the I2C-HAT, after this a i2c_read will be issued, this i2c_read is used for reading the response        
                     dummy_byte = 0xFF
-                    expected_response_size = I2CFrame.ID_SIZE + I2CFrame.Command.SIZE + response_data_size + I2CFrame.CRC_SIZE
+                    expected_response_size = I2CFrame.ID_SIZE + I2CFrame.CMD_SIZE + response_data_size + I2CFrame.CRC_SIZE
                     response_data = I2CHat.i2c_bus.read_i2c_block_data(self.__address, dummy_byte, expected_response_size)
                     # print response_data
                     
@@ -178,7 +176,7 @@ class I2CHat(object):
         """
         request = self._request_frame_(cmd, [])
         response = self._transfer_(request, 4)
-        data = response.get_data()
+        data = response.data
         if len(data) != 4:
             raise I2CHatResponseException('unexpected format')
         return data[0] + (data[1] << 8) + (data[2] << 16) + (data[3] << 24)
@@ -199,7 +197,7 @@ class I2CHat(object):
         data = [value & 0xFF, (value >> 8) & 0xFF, (value >> 16) & 0xFF, (value >> 24) & 0xFF]
         request = self._request_frame_(cmd, data)
         response = self._transfer_(request, 4)
-        if data != response.get_data():
+        if data != response.data:
             raise I2CHatResponseException('unexpected format')
 
     def _request_frame_(self, cmd, data = []):
@@ -236,7 +234,7 @@ class I2CHat(object):
         request = self._request_frame_(Command.GET_BOARD_NAME)
         response = self._transfer_(request, 25)
         board_name = ''    
-        for byte in response.get_data():
+        for byte in response.data:
             if byte == 0:
                 break;
             board_name += chr(byte)
@@ -252,7 +250,7 @@ class I2CHat(object):
         """
         request = self._request_frame_(Command.GET_FIRMWARE_VERSION)
         response = self._transfer_(request, 3)
-        data = response.get_data()
+        data = response.data
         return 'v' + chr(data[0] + 0x30) + '.' + chr(data[1] + 0x30)  + '.' + chr(data[2] + 0x30)
     
     @property
@@ -279,14 +277,14 @@ class I2CHatModule(object):
         if labels != None:
             self.__lc_labels = [l.lower() for l in labels]
     
-    def _validate_channel_index(index):
+    def _validate_channel_index(self, index):
         if self.__labels == None:
             raise Exception()
         
         label = None
         if isinstance(index, int):
             if not (0 <= index < len(self.__labels)):
-                raise ValueError("'" + index + "' is not a valid channel index")
+                raise ValueError("'" + str(index) + "' is not a valid channel index")
         elif isinstance(index, str):
             label = index
             try:
@@ -399,5 +397,5 @@ class Cwdt(I2CHatModule):
             raise ValueError("Period should be greather than zero to enable the CommunicationWatchdogTimer on the I2C-HAT board")
         
         self._i2c_hat._set_u32_value_(Command.CWDT_SET_PERIOD, int(value * 1000))
-        self.cwdt_feed_thread.update() # command for CWDT thread to update/read the CWDT period
+        #self.cwdt_feed_thread.update() # command for CWDT thread to update/read the CWDT period
 

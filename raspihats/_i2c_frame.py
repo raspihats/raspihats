@@ -70,7 +70,7 @@ class I2CFrame(object):
             int: The frame Id byte value
             
         """
-        return self.__fid
+        return self.__id
 
     @property
     def cmd(self):
@@ -99,7 +99,7 @@ class I2CFrame(object):
             List[int]: List of frame bytes, raw data that can be transmitted over the I2C bus
             
         """
-        data = [self.__fid, self.__cmd] + self.__data
+        data = [self.__id, self.__cmd] + self.__data
         crc = calc(data) 
         return data + [(crc & 0xFF), ((crc >> 8) & 0xFF)]
     
@@ -114,11 +114,11 @@ class I2CFrame(object):
             I2CFrameDecodeException: If the response frame Crc check fails, or has an unexpected Id or Command
             
         """
-        self.__check_uint8__(data)
+        self.__check_uint8(data)
         crc = calc(data[:-2])
         if crc != (data[-1] << 8) + data[-2]:
             raise I2CFrameDecodeException('Crc check failed')
-        if self.__fid != data[0]:
+        if self.__id != data[0]:
             raise I2CFrameDecodeException('unexpected Id')
         if self.__cmd != data[1]:
             raise I2CFrameDecodeException('unexpected Command')

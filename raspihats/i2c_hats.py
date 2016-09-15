@@ -1,7 +1,7 @@
 """
 This module contains the I2C-HATs classes.
 """
-from ._i2c_hat import I2CHat
+from ._i2c_hat import I2CHat, Cwdt
 from ._digital import DigitalOutputs, DigitalInputs
 
 class Di16(I2CHat):
@@ -28,6 +28,7 @@ class Di16(I2CHat):
             
         """
         I2CHat.__init__(self, address, self.BASE_ADDRESS, self.BOARD_NAME)
+        self.cwdt = Cwdt(self)
         self.di = DigitalInputs(self, self.__labels)
 
 class Rly10(I2CHat):
@@ -49,6 +50,7 @@ class Rly10(I2CHat):
                         
         """
         I2CHat.__init__(self, address, self.BASE_ADDRESS, self.BOARD_NAME)
+        self.cwdt = Cwdt(self)
         self.do = DigitalOutputs(self, self.__labels)
  
 
@@ -72,5 +74,6 @@ class Di6Rly6(I2CHat):
             
         """
         I2CHat.__init__(self, address, self.BASE_ADDRESS, self.BOARD_NAME)
+        self.cwdt = Cwdt(self)
         self.di = DigitalInputs(self, self.__di_labels)
         self.do = DigitalOutputs(self, self.__do_labels)
