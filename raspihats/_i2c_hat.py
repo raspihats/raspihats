@@ -348,9 +348,8 @@ class CwdtFeedThread(threading.Thread):
             
 class Cwdt(I2CHatModule):
     
-    def __init__(self, i2c_hat, period=4):
+    def __init__(self, i2c_hat):
         I2CHatModule.__init__(self, i2c_hat)
-        self.__period = period
         self.__feed_thread = CwdtFeedThread()
     
     def start_feed_thread(self):
@@ -363,10 +362,10 @@ class Cwdt(I2CHatModule):
             ValueError: If period is not greather than zero, a period greather than is required zero to enable the CommunicationWatchdogTimer on the I2C-HAT board.
         
         """
-        if period <= 0:
+        if period < 0:
             raise ValueError("Period should be greather than zero to enable the CommunicationWatchdogTimer on the I2C-HAT board")
         self.set_cwdt_period(period)
-        self.start()
+        #self.start()
                 
     def stop_feed_thread(self):
         """Sends comand to stop the CommunicationWatchdogTimer feed thread disables it."""
@@ -393,7 +392,7 @@ class Cwdt(I2CHatModule):
             value(float): The CommunicationWatchdogTimer period value in seconds
         
         """
-        if value <= 0:
+        if value < 0:
             raise ValueError("Period should be greather than zero to enable the CommunicationWatchdogTimer on the I2C-HAT board")
         
         self._i2c_hat._set_u32_value_(Command.CWDT_SET_PERIOD, int(value * 1000))

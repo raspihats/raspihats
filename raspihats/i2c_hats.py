@@ -77,3 +77,12 @@ class Di6Rly6(I2CHat):
         self.cwdt = Cwdt(self)
         self.di = DigitalInputs(self, self.__di_labels)
         self.do = DigitalOutputs(self, self.__do_labels)
+        
+def new_Di16(adr):
+    return Di16(adr)
+
+def new_Rly10(adr):
+    return Rly10(adr)
+
+def new_Di6Rly6(adr):
+    return Di6Rly6(adr)
