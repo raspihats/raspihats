@@ -29,7 +29,7 @@ class I2CFrame(object):
     CMD_SIZE = 1
     CRC_SIZE = 2
 
-    def __init__(self, fid, cmd, data = []):
+    def __init__(self, id_, cmd, data = []):
         """Build I2CFrame object setting Id, Command, and Data Fields, check if all values are valid uint8 first.
         
         Args:
@@ -38,14 +38,15 @@ class I2CFrame(object):
             data(List[int]): Payload data bytes
         
         """
-        self.__check_uint8__(fid)
-        self.__check_uint8__(cmd)
-        self.__check_uint8__(data)
-        self.fid = fid
-        self.cmd = cmd
-        self.data = data
+        self.__check_uint8(id_)
+        self.__check_uint8(cmd)
+        self.__check_uint8(data)
         
-    def __check_uint8__(self, data):
+        self.__id = id_
+        self.__cmd = cmd
+        self.__data = data
+        
+    def __check_uint8(self, data):
         """Check if data is valid uint8 value or a list of uint8 values.
         
         Args:
@@ -61,32 +62,35 @@ class I2CFrame(object):
             if not 0 <= byte <= 0xFF:
                 raise ValueError("expecting uint8 value")
 
-    def get_cmd(self):
-        """Get the frame Command byte.
-        
-        Returns:
-            int: The frame Command byte value
-            
-        """
-        return self.cmd
-
-    def get_id(self):
+    @property
+    def id(self):
         """Get the frame Id byte.
         
         Returns:
             int: The frame Id byte value
             
         """
-        return self.fid
+        return self.__fid
 
-    def get_data(self):
+    @property
+    def cmd(self):
+        """Get the frame Command byte.
+        
+        Returns:
+            int: The frame Command byte value
+            
+        """
+        return self.__cmd
+
+    @property
+    def data(self):
         """Get the frame payload data.
         
         Returns:
             List[int]: The Data field which conatins the payload data bytes
             
         """
-        return self.data
+        return self.__data
     
     def encode(self):
         """Encode the frame fields: Id, Command, Data and Crc to a list of ints.
@@ -95,7 +99,7 @@ class I2CFrame(object):
             List[int]: List of frame bytes, raw data that can be transmitted over the I2C bus
             
         """
-        data = [self.fid, self.cmd] + self.data
+        data = [self.__fid, self.__cmd] + self.__data
         crc = calc(data) 
         return data + [(crc & 0xFF), ((crc >> 8) & 0xFF)]
     
@@ -114,8 +118,8 @@ class I2CFrame(object):
         crc = calc(data[:-2])
         if crc != (data[-1] << 8) + data[-2]:
             raise I2CFrameDecodeException('Crc check failed')
-        if self.fid != data[0]:
+        if self.__fid != data[0]:
             raise I2CFrameDecodeException('unexpected Id')
-        if self.cmd != data[1]:
+        if self.__cmd != data[1]:
             raise I2CFrameDecodeException('unexpected Command')
-        self.data = data[2:-2]
+        self.__data = data[2:-2]
