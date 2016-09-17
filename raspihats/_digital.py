@@ -26,7 +26,7 @@ class DigitalInputs(I2CHatModule):
         I2CHatModule.__init__(self, i2c_hat, labels)
         outer_instance = self
         
-        class Channel(object):
+        class Channels(object):
             def __getitem__(self, index):
                 index = outer_instance._validate_channel_index(index)
                 request = outer_instance._i2c_hat._request_frame_(Command.DI_GET_CHANNEL_STATE, [index])
@@ -36,7 +36,7 @@ class DigitalInputs(I2CHatModule):
                     raise I2CHatResponseException('unexpected format')
                 return data[1] > 0
         
-        class Counter(object):
+        class Counters(object):
             def __init__(self, counter_type):
                 self.__counter_type = counter_type
             
@@ -59,9 +59,9 @@ class DigitalInputs(I2CHatModule):
                 if (len(data) != 2) or (index != data[0]) or (self.__counter_type != data[1]):
                     raise I2CHatResponseException('unexpected format')
                 
-        self.channel = Channel()
-        self.r_counter = Counter(1)
-        self.f_counter = Counter(0)
+        self.channels = Channels()
+        self.r_counters = Counters(1)
+        self.f_counters = Counters(0)
     
     @property
     def value(self):
@@ -105,7 +105,7 @@ class DigitalOutputs(I2CHatModule):
         I2CHatModule.__init__(self, i2c_hat, labels)
         outer_instance = self
         
-        class Channel(object):
+        class Channels(object):
             def __getitem__(self, index):
                 index = outer_instance._validate_channel_index(index)
                 request = outer_instance._i2c_hat._request_frame_(Command.DO_GET_CHANNEL_STATE, [index])
@@ -123,7 +123,7 @@ class DigitalOutputs(I2CHatModule):
                 if data != response.data:
                     raise I2CHatResponseException('unexpected format')
         
-        self.channel = Channel()
+        self.channels = Channels()
         
     @property
     def power_on_value(self):
