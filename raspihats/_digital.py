@@ -117,7 +117,10 @@ class DigitalOutputs(I2CHatModule):
             
             def __setitem__(self, index, value):
                 index = outer_instance._validate_channel_index(index)
-                data = [index, int(value)]
+                value = int(value)
+                if not (0 <= value <= 1):
+                    raise ValueError("'" + str(value) + "' is not a valid value, use: 0 or 1, True or False")
+                data = [index, value]
                 request = outer_instance._i2c_hat._request_frame_(Command.DO_SET_CHANNEL_STATE, data)
                 response = outer_instance._i2c_hat._transfer_(request, 2)
                 if data != response.data:
