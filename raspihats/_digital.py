@@ -1,27 +1,15 @@
-from ._i2c_hat import Command, I2CHatModule
+from ._i2c_hat import Command, I2CHatModule, I2CHatResponseException
 
 
 class DigitalInputs(I2CHatModule):
-    """Extends the basic functionality by adding the required attributes and methods needed for operating the digital inputs channels.
-    
-    Note:
-        The digital input channels are separated in blocks and labeled Dix.y (x - block number, y - channel
-        number). The methods that operate on a single channel use the ``channel label`` (starting from Di1.1)
-        or the ``channel index`` (starting from 0) as channel parameter. Methods that operate on all channels can
-        return an ``int compact value`` that contains all the digital input channels states from all blocks, one
-        channel per bit, for example, Di16 I2C-HAT has 4 input blocks, in this case bit0 of the compact value
-        reflects state of Di1.1, bit1 - Di1.2, .. bit4 - Di2.1 an so on...
-    
-    """
+    """Attributes and methods needed for operating the digital inputs channels."""
     
     def __init__(self, i2c_hat, labels):
-        """Construct a DigitalInputs object, setting the channel_labels, I2C-HAT address and base_address and the I2C port.
+        """Construct a DigitalInputs object.
         
         Args:
+            i2c_hat (I2CHat): board
             labels (List[str]): Labels of digital input channels as written on the board
-            address (int): I2C address, valid range is dependent of base_address
-            base_address (int): I2C-HAT family base address
-            board_name (str): I2C-HAT board name
         """
         I2CHatModule.__init__(self, i2c_hat, labels)
         outer_instance = self
@@ -65,6 +53,11 @@ class DigitalInputs(I2CHatModule):
     
     @property
     def value(self):
+        """Getter for .value attributte
+        
+        Returns:
+            int: The value of all the digital inputs, 1 bit represents 1 channel
+        """
         return self._i2c_hat._get_u32_value_(Command.DI_GET_ALL_CHANNEL_STATES)
     
     def reset_counters(self):
@@ -83,23 +76,14 @@ class DigitalInputs(I2CHatModule):
 
 
 class DigitalOutputs(I2CHatModule):
-    """Extends the basic functionality by adding the required attributes and methods needed for operating
-    the digital outputs channels.
+    """Attributes and methods needed for operating the digital outputs channels."""
     
-    Note:
-        The relay digital output channels are labeled Rlyx(x - relay number, starting from Rly1).
-        The methods that operate on a single channel use the ``channel label`` or the ``channel index``
-        (starting from 0) as channel parameter. Methods that operate on all channels use the ``int compact value``
-        (all the digital output channels data states encoded as one channel state per bit) or a ``dict`` (all the
-        channel labels as string keys and states as bool values) as input parameters or as returned values. 
-    
-    """
     def __init__(self, i2c_hat, labels):
-        """Construct a DigitalOutputs object, setting the I2C-HAT channel_labels, address, base_address and
-        the I2C port.
+        """Construct a DigitalOutputs object.
         
         Args:
-            channel_labels (List[str]): Labels of digital input channels
+            i2c_hat (I2CHat): board
+            labels (List[str]): Labels of digital input channels
 
         """
         I2CHatModule.__init__(self, i2c_hat, labels)
@@ -128,27 +112,65 @@ class DigitalOutputs(I2CHatModule):
         
         self.channels = Channels()
         
+    def _validate_value(self, value):
+        max_value = (0x01 << len(self.labels)) - 1
+        if not (0 <= value <= max_value):
+            raise ValueError("'" + str(value) + "' is not a valid value, is [0x00 .. " + hex(max_value) + "]")
+        
     @property
     def power_on_value(self):
+        """Getter for .power_on_value attributte
+        
+        Returns:
+            int: The power on value
+        """
         return self._i2c_hat._get_u32_value_(Command.DO_GET_POWER_ON_VALUE)
 
     @power_on_value.setter
     def power_on_value(self, value):
+        """Setter for .power_on_value attributte
+        
+        Args:
+            value (int): new power on value
+        """
+        self._validate_value(value)
         self._i2c_hat._set_u32_value_(Command.DO_SET_POWER_ON_VALUE, value)
 
     @property
     def safety_value(self):
+        """Getter for .safety_value attributte
+        
+        Returns:
+            int: The safety value
+        """
         return self._i2c_hat._get_u32_value_(Command.DO_GET_SAFETY_VALUE)
 
     @safety_value.setter
     def safety_value(self, value):
+        """Setter for .safety_value attributte
+        
+        Args:
+            value (int): new safety value
+        """
+        self._validate_value(value)
         self._i2c_hat._set_u32_value_(Command.DO_SET_SAFETY_VALUE, value)
 
     @property
     def value(self):
+        """Getter for .value attributte
+        
+        Returns:
+            int: The value of all the digital outputs, 1 bit represents 1 channel
+        """
         return self._i2c_hat._get_u32_value_(Command.DO_GET_ALL_CHANNEL_STATES)
 
     @value.setter
     def value(self, value):
+        """Getter for .value attributte.
+        
+        Args:
+            value (int): The desired value of all the digital outputs, 1 bit represents 1 channel
+        """
+        self._validate_value(value)
         self._i2c_hat._set_u32_value_(Command.DO_SET_ALL_CHANNEL_STATES, value)
         
