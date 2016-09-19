@@ -2,15 +2,19 @@ from ._i2c_hat import Command, I2CHatModule, I2CHatResponseException
 
 
 class DigitalInputs(I2CHatModule):
-    """Attributes and methods needed for operating the digital inputs channels."""
+    """Attributes and methods needed for operating the digital inputs channels.
+    
+    Args:
+        i2c_hat (:obj:`raspihats._i2c_hat.I2CHat`): board
+        labels (:obj:`list` of :obj:`str`): Labels of digital input channels
+        
+    Attributes:
+        channels (:obj:`list` of :obj:`bool`): List like object, provides single channel access to digital inputs.
+        counters (:obj:`list` of :obj:`int`): List like object, provides single channel access to digital input counters.
+        
+    """
     
     def __init__(self, i2c_hat, labels):
-        """Construct a DigitalInputs object.
-        
-        Args:
-            i2c_hat (I2CHat): board
-            labels (List[str]): Labels of digital input channels as written on the board
-        """
         I2CHatModule.__init__(self, i2c_hat, labels)
         outer_instance = self
         
@@ -23,6 +27,9 @@ class DigitalInputs(I2CHatModule):
                 if len(data) != 2 or data[0] != index:
                     raise I2CHatResponseException('unexpected format')
                 return data[1] > 0
+            
+            def __len__(self):
+                return len(outer_instance.labels)
         
         class Counters(object):
             def __init__(self, counter_type):
@@ -47,22 +54,21 @@ class DigitalInputs(I2CHatModule):
                 if (len(data) != 2) or (index != data[0]) or (self.__counter_type != data[1]):
                     raise I2CHatResponseException('unexpected format')
                 
+            def __len__(self):
+                return len(outer_instance.labels)
+                
         self.channels = Channels()
         self.r_counters = Counters(1)
         self.f_counters = Counters(0)
     
     @property
     def value(self):
-        """Getter for .value attributte
-        
-        Returns:
-            int: The value of all the digital inputs, 1 bit represents 1 channel
-        """
+        """:obj:`int`: The value of all the digital inputs, 1 bit represents 1 channel."""
+
         return self._i2c_hat._get_u32_value_(Command.DI_GET_ALL_CHANNEL_STATES)
     
     def reset_counters(self):
-        """Send a I2C request request to reset all digital input channel counters of all types(falling and
-        rising edge).
+        """Resets all digital input channel counters of all types(falling and rising edge).
         
         Raises:
             I2CHatResponseException: If the response hasn't got the expected format
@@ -76,16 +82,18 @@ class DigitalInputs(I2CHatModule):
 
 
 class DigitalOutputs(I2CHatModule):
-    """Attributes and methods needed for operating the digital outputs channels."""
+    """Attributes and methods needed for operating the digital outputs channels.
+
+    Args:
+        i2c_hat (:obj:`raspihats._i2c_hat.I2CHat`): board
+        labels (:obj:`list` of :obj:`str`): Labels of digital output channels
+        
+    Attributes:
+        channels (:obj:`list` of :obj:`bool`): List like object, provides single channel access to digital outputs.
+        
+    """
     
     def __init__(self, i2c_hat, labels):
-        """Construct a DigitalOutputs object.
-        
-        Args:
-            i2c_hat (I2CHat): board
-            labels (List[str]): Labels of digital input channels
-
-        """
         I2CHatModule.__init__(self, i2c_hat, labels)
         outer_instance = self
         
@@ -109,6 +117,9 @@ class DigitalOutputs(I2CHatModule):
                 response = outer_instance._i2c_hat._transfer_(request, 2)
                 if data != response.data:
                     raise I2CHatResponseException('unexpected format')
+                
+            def __len__(self):
+                return len(outer_instance.labels)
         
         self.channels = Channels()
         
@@ -118,59 +129,35 @@ class DigitalOutputs(I2CHatModule):
             raise ValueError("'" + str(value) + "' is not a valid value, is [0x00 .. " + hex(max_value) + "]")
         
     @property
-    def power_on_value(self):
-        """Getter for .power_on_value attributte
+    def value(self):
+        """:obj:`int`: The value of all the digital outputs, 1 bit represents 1 channel."""
         
-        Returns:
-            int: The power on value
-        """
+        return self._i2c_hat._get_u32_value_(Command.DO_GET_ALL_CHANNEL_STATES)
+
+    @value.setter
+    def value(self, value):
+        self._validate_value(value)
+        self._i2c_hat._set_u32_value_(Command.DO_SET_ALL_CHANNEL_STATES, value)
+        
+    @property
+    def power_on_value(self):
+        """:obj:`int`: Power On Value, this is loaded to outputs at power on."""
+        
         return self._i2c_hat._get_u32_value_(Command.DO_GET_POWER_ON_VALUE)
 
     @power_on_value.setter
     def power_on_value(self, value):
-        """Setter for .power_on_value attributte
-        
-        Args:
-            value (int): new power on value
-        """
         self._validate_value(value)
         self._i2c_hat._set_u32_value_(Command.DO_SET_POWER_ON_VALUE, value)
 
     @property
     def safety_value(self):
-        """Getter for .safety_value attributte
+        """:obj:`int`: Safety Value, this is loaded to outputs at Cwdt Timeout."""
         
-        Returns:
-            int: The safety value
-        """
         return self._i2c_hat._get_u32_value_(Command.DO_GET_SAFETY_VALUE)
 
     @safety_value.setter
     def safety_value(self, value):
-        """Setter for .safety_value attributte
-        
-        Args:
-            value (int): new safety value
-        """
         self._validate_value(value)
         self._i2c_hat._set_u32_value_(Command.DO_SET_SAFETY_VALUE, value)
-
-    @property
-    def value(self):
-        """Getter for .value attributte
-        
-        Returns:
-            int: The value of all the digital outputs, 1 bit represents 1 channel
-        """
-        return self._i2c_hat._get_u32_value_(Command.DO_GET_ALL_CHANNEL_STATES)
-
-    @value.setter
-    def value(self, value):
-        """Getter for .value attributte.
-        
-        Args:
-            value (int): The desired value of all the digital outputs, 1 bit represents 1 channel
-        """
-        self._validate_value(value)
-        self._i2c_hat._set_u32_value_(Command.DO_SET_ALL_CHANNEL_STATES, value)
         

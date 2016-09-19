@@ -5,7 +5,28 @@ This package provides the necessary code to interface the Raspberry Pi HATs(add-
 
 
 Typical usage often looks like this:
+        
+Starting from v2.0.0
+        
+.. code-block:: python
 
+    #!/usr/bin/env python
+    # In this setup there are two I2C-HATs stacked, one Di16 and one Rly10.
+    from raspihats.i2c_hats import Di16, Rly10
+    
+    di16 = Di16(0x40)   # 0x40 is the I2C bus address
+    rly10 = Rly10(0x50) # 0x50 is the I2C bus address
+    # The I2C-HAT address high nibble is fixed(0x4 for Di16, 0x5 for Rly10), the low nibble
+    # value is set using the on-board address jumper, range is [0x0 .. 0xF].
+    
+    while True:
+        state = di16.di.channel['Di1.1']
+        rly10.do.channel['Rly1'] = state
+        rly10.do.channel['Rly2'] = not state
+        
+        
+Old version v1.x.x
+        
 .. code-block:: python
 
     #!/usr/bin/env python
