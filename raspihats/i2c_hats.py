@@ -5,14 +5,19 @@ from ._i2c_hat import I2CHat, Cwdt
 from ._digital import DigitalOutputs, DigitalInputs
 
 class Di16(I2CHat):
-    """This class exposes all operations supported by the Rly10 I2C-HAT, it inherits functionality from DigitalInputs class."""
+    """This class exposes all operations supported by the Di16 I2C-HAT.
     
-    BASE_ADDRESS = 0x40
-    """I2C start address for Di16 I2C-HATs, valid range is [0x40 .. 0x4F]."""
+    Args:
+        address (:obj:`int`): I2C bus address, valid range is [0x40, 0x4F]
+
+    Attributes:
+        cwdt (:obj:`raspihats._i2c_hat.Cwdt`): provides access to CommunicationWatchDogTimer.
+        di (:obj:`raspihats._digital.DigitalInputs`): provides access to DigitalInputs.
     
-    BOARD_NAME = "Di16 I2C-HAT"
-    """Expected board name response for the get_board_name() method."""
-    
+    """
+
+    __BASE_ADDRESS = 0x40
+    __BOARD_NAME = 'Di16 I2C-HAT'
     __labels = [
         'Di1.1', 'Di1.2', 'Di1.3', 'Di1.4',
         'Di2.1', 'Di2.2', 'Di2.3', 'Di2.4',
@@ -21,58 +26,49 @@ class Di16(I2CHat):
     ]
     
     def __init__(self, address):
-        """Construct a Di16 object, setting the I2C port and I2C-HAT address.
-        
-        Args:
-            address(int): I2C address, valid range is [0x40, 0x4F]
-            
-        """
-        I2CHat.__init__(self, address, self.BASE_ADDRESS, self.BOARD_NAME)
+        I2CHat.__init__(self, address, self.__BASE_ADDRESS, self.__BOARD_NAME)
         self.cwdt = Cwdt(self)
         self.di = DigitalInputs(self, self.__labels)
 
 class Rly10(I2CHat):
-    """This class exposes all operations supported by the Rly10 I2C-HAT, it inherits functionality from DigitalOutputs class."""
+    """This class exposes all operations supported by the Rly10 I2C-HAT.
     
-    BASE_ADDRESS = 0x50
-    """I2C start address for Di16 I2C-HATs, valid range is [0x50 .. 0x5F]."""
+    Args:
+        address (:obj:`int`): I2C bus address, valid range is [0x50, 0x5F]
+
+    Attributes:
+        cwdt (:obj:`raspihats._i2c_hat.Cwdt`): provides access to CommunicationWatchDogTimer.
+        do (:obj:`raspihats._digital.DigitalOutputs`): provides access to DigitalOutputs.
+    """
     
-    BOARD_NAME = "Rly10 I2C-HAT"
-    """Expected board name response for the get_board_name() method."""
-    
+    __BASE_ADDRESS = 0x50    
+    __BOARD_NAME = 'Rly10 I2C-HAT'
     __labels = ['Rly1', 'Rly2', 'Rly3', 'Rly4', 'Rly5', 'Rly6', 'Rly7', 'Rly8', 'Rly9', 'Rly10']
     
     def __init__(self, address):
-        """Construct a Rly10 object, setting the I2C port and I2C-HAT address.
-        
-        Args:
-            address(int): I2C address, valid range is [0x50, 0x5F]
-                        
-        """
-        I2CHat.__init__(self, address, self.BASE_ADDRESS, self.BOARD_NAME)
+        I2CHat.__init__(self, address, self.__BASE_ADDRESS, self.__BOARD_NAME)
         self.cwdt = Cwdt(self)
         self.do = DigitalOutputs(self, self.__labels)
- 
 
 class Di6Rly6(I2CHat):
-    """This class exposes all operations supported by the Di6Rly6 I2C-HAT, it inherits functionality from DigitalInputs and DigitalOutputs classes."""
+    """This class exposes all operations supported by the Di6Rly6 I2C-HAT.
     
-    BASE_ADDRESS = 0x60
-    """I2C start address for Di16 I2C-HATs, valid range is [0x60 .. 0x6F]."""
+    Args:
+        address (:obj:`int`): I2C bus address, valid range is [0x60, 0x6F]
+
+    Attributes:
+        cwdt (:obj:`raspihats._i2c_hat.Cwdt`): provides access to CommunicationWatchDogTimer.
+        di (:obj:`raspihats._digital.DigitalInputs`): provides access to DigitalInputs.
+        do (:obj:`raspihats._digital.DigitalOutputs`): provides access to DigitalOutputs.
     
-    BOARD_NAME = "Di6Rly6 I2C-HAT"
-    """Expected board name response for the get_board_name() method."""
+    """
     
+    __BASE_ADDRESS = 0x60
+    __BOARD_NAME = 'Di6Rly6 I2C-HAT'
     __di_labels = ['Di1.1', 'Di1.2', 'Di1.3', 'Di1.4', 'Di1.5', 'Di1.6']
     __do_labels = ['Rly1', 'Rly2', 'Rly3', 'Rly4', 'Rly5', 'Rly6']
     
     def __init__(self, address):
-        """Construct a Di6Rly6 object, setting the I2C port and I2C-HAT address.
-        
-        Args:
-            address(int): I2C address, valid range is [0x60, 0x6F]
-            
-        """
         I2CHat.__init__(self, address, self.BASE_ADDRESS, self.BOARD_NAME)
         self.cwdt = Cwdt(self)
         self.di = DigitalInputs(self, self.__di_labels)
