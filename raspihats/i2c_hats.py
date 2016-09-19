@@ -69,7 +69,7 @@ class Di6Rly6(I2CHat):
     __do_labels = ['Rly1', 'Rly2', 'Rly3', 'Rly4', 'Rly5', 'Rly6']
     
     def __init__(self, address):
-        I2CHat.__init__(self, address, self.BASE_ADDRESS, self.BOARD_NAME)
+        I2CHat.__init__(self, address, self.__BASE_ADDRESS, self.__BOARD_NAME)
         self.cwdt = Cwdt(self)
         self.di = DigitalInputs(self, self.__di_labels)
         self.do = DigitalOutputs(self, self.__do_labels)
