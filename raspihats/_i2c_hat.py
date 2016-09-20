@@ -1,5 +1,5 @@
 """
-This module contains the I2CHat base class and extensions.
+This module contains the I2CHat base class.
 """
 import sys
 import time
@@ -13,6 +13,8 @@ else:
     import queue as queue
 
 class Command(object) :
+    """I2C-HAT commands""" 
+    
     # General Board Commands
     GET_BOARD_NAME = 0x10
     GET_FIRMWARE_VERSION = 0x11
@@ -41,44 +43,32 @@ class Command(object) :
     DO_SET_CHANNEL_STATE = 0x36
     DO_GET_CHANNEL_STATE = 0x37
 
-
-
 class I2CHatResponseException(Exception):
     """Raised when there's a problem with the I2C-HAT response."""
 
 class I2CHat(object):
-    """Implements basic functionality common to all I2C-HATs."""
+    """Implements basic functionality common to all I2C-HATs.
+    
+    Args:
+        address (int): I2C bus address, valid range is depends of base_address
+        base_address (int): I2C-HAT family starting address
+        board_name (str): I2C-HAT expected board name
         
-    i2c_bus_lock = threading.Lock()
+    Raises:
+        ValueError: If address is not in range
+        
+    (*) - attribute value read directly from I2C-HAT 
+        
+    """
+        
+    _i2c_bus_lock = threading.Lock()
+    _i2c_bus = None
     try:
-        i2c_bus = smbus.SMBus(1)     # default for Raspberry Pi
+        _i2c_bus = smbus.SMBus(1)     # default for Raspberry Pi
     except:
         print("I2C port not found!")
-        i2c_bus = None
-
-    @staticmethod
-    def set_i2c_port(i2c_port):
-        """Set the I2C port number.
-                
-        Args:
-            i2c_port (int): I2C port number
-        
-        """
-        I2CHat.i2c_bus = smbus.SMBus(i2c_port)
     
     def __init__(self, address, base_address=None, board_name=None):
-        """Build I2CHat object setting the I2C bus and I2C address.
-        
-        Args:
-            address (int): I2C address, valid range is dependent of base_address
-            base_address (int): I2C-HAT base address
-            board_name (str): I2C-HAT board name
-            
-        Raises:
-            ValueError: If address is not in range
-            
-        """
-        
         if base_address == None:
             if not 0 <= address <= 127:
                 raise ValueError("I2C address should be in range[0, 127]")
@@ -94,8 +84,6 @@ class I2CHat(object):
                 raise Exception("Unexpected board name: " + self.name + ", expecting: " + board_name)
         
     def __str__(self):
-        """Returns the string representation."""
-        
         return self.name + " adr: " + hex(self.__address)
 
     def _generate_frame_id_(self):
@@ -125,7 +113,7 @@ class I2CHat(object):
             I2CHatResponseException: After all attempts to get a response have failed
             
         """
-        with I2CHat.i2c_bus_lock:
+        with I2CHat._i2c_bus_lock:
             exceptions = []
             try_cnt = 0
             while True:
@@ -134,7 +122,7 @@ class I2CHat(object):
                     # print request_data
                     
                     # NOTE: write_i2c_block_data function is used to send commands to the I2C-HAT
-                    I2CHat.i2c_bus.write_i2c_block_data(self.__address, request_data[0], request_data[1:])
+                    I2CHat._i2c_bus.write_i2c_block_data(self.__address, request_data[0], request_data[1:])
                     
                     if not response_expected:
                         return
@@ -143,7 +131,7 @@ class I2CHat(object):
                     # write will be ignored by the I2C-HAT, after this a i2c_read will be issued, this i2c_read is used for reading the response        
                     dummy_byte = 0xFF
                     expected_response_size = I2CFrame.ID_SIZE + I2CFrame.CMD_SIZE + response_data_size + I2CFrame.CRC_SIZE
-                    response_data = I2CHat.i2c_bus.read_i2c_block_data(self.__address, dummy_byte, expected_response_size)
+                    response_data = I2CHat._i2c_bus.read_i2c_block_data(self.__address, dummy_byte, expected_response_size)
                     # print response_data
                     
                     # build response frame
@@ -215,22 +203,12 @@ class I2CHat(object):
     
     @property
     def address(self):
-        """Read I2C bus address.
-        
-        Returns:
-            int: The I2C bus address value.
-        
-        """
+        """:obj:`int`: I2C bus address."""
         return self.__address
     
     @property
     def name(self):
-        """Send a request over the I2C bus to get the board name.
-        
-        Returns:
-            string: The board name
-        
-        """
+        """:obj:`string`: Name(*)."""
         request = self._request_frame_(Command.GET_BOARD_NAME)
         response = self._transfer_(request, 25)
         board_name = ''    
@@ -242,12 +220,7 @@ class I2CHat(object):
 
     @property
     def fw_version(self):
-        """Send a request over the I2C bus to get the firmware version.
-        
-        Returns:
-            string: The firmware version
-        
-        """
+        """:obj:`string`: Firmware version(*)."""
         request = self._request_frame_(Command.GET_FIRMWARE_VERSION)
         response = self._transfer_(request, 3)
         data = response.data
@@ -255,23 +228,25 @@ class I2CHat(object):
     
     @property
     def status(self):
-        """Send a request over the I2C bus to get the StatusWord value.
-        
-        Returns:
-            int: The StatusWord value
-        
-        """
+        """:obj:`int`: Status word(*)."""
         return self._get_u32_value_(Command.GET_STATUS_WORD)
     
     def reset(self):
-        """Send a request over the I2C bus to reset the I2C-HAT."""
+        """Sends a reset request to the I2C-HAT."""
         request = self._request_frame_(Command.RESET)
         self._transfer_(request, 0, False)
 
 
 class I2CHatModule(object):
+    """ I2C-HAT module base.
     
-    def __init__(self, i2c_hat, labels = None):
+    Args:
+        i2c_hat (:obj:`raspihats._i2c_hat.I2CHat`): I2CHat instance
+        labels (:obj:`list` of :obj:`str` or optional): Channel labels
+    
+    """
+    
+    def __init__(self, i2c_hat, labels=None):
         self._i2c_hat = i2c_hat
         self.__labels = labels
         if labels != None:
@@ -295,13 +270,19 @@ class I2CHatModule(object):
             raise ValueError("index type is '" + type(index) + "', expecting 'int' or 'str'")
         return index
     
+    def _validate_value(self, value):
+        max_value = (0x01 << len(self.__labels)) - 1
+        if not (0 <= value <= max_value):
+            raise ValueError("'" + str(value) + "' is not a valid value, is [0x00 .. " + hex(max_value) + "]")
+    
     @property
     def labels(self):
+        """:obj:`list` of :obj:`str`: Channel Labels."""
         return self.__labels
 
 
 class CwdtFeedThread(threading.Thread):
-    """Implements basic functionality common to all I2C-HATs."""
+    """***"""
     
     def __init__(self):
         threading.Thread.__init__(self)
@@ -347,11 +328,32 @@ class CwdtFeedThread(threading.Thread):
                 pass
             
 class Cwdt(I2CHatModule):
+    """Provides attributes and methods for operating the I2C-HAT CommunicationWatchdogTimer module.
+    
+    Args:
+        i2c_hat (:obj:`raspihats._i2c_hat.I2CHat`): I2CHat instance
+    
+    (*) - attribute value read directly from I2C-HAT
+    
+    """
     
     def __init__(self, i2c_hat):
         I2CHatModule.__init__(self, i2c_hat)
         self.__feed_thread = CwdtFeedThread()
-    
+
+    @property
+    def period(self):
+        """:obj:`int`: The CommunicationWatchdogTimer period value in seconds(*)."""
+        return float(self._i2c_hat._get_u32_value_(Command.CWDT_GET_PERIOD)) / 1000
+
+    @period.setter
+    def period(self, value):
+        if value < 0:
+            raise ValueError("Period should be greather than zero to enable the CommunicationWatchdogTimer on the I2C-HAT board")
+        
+        self._i2c_hat._set_u32_value_(Command.CWDT_SET_PERIOD, int(value * 1000))
+        #self.cwdt_feed_thread.update() # command for CWDT thread to update/read the CWDT period
+        
     def start_feed_thread(self):
         """Starts the CommunicationWatchdogTimer feed thread and sets the I2C-HAT board CommunicationWatchdogTimer period.
         
@@ -369,32 +371,6 @@ class Cwdt(I2CHatModule):
                 
     def stop_feed_thread(self):
         """Sends comand to stop the CommunicationWatchdogTimer feed thread disables it."""
-        
         self.set_cwdt_period(0)
         self.cwdt_feed_thread.stop()
-
-    @property
-    def period(self):
-        """Sends a request over the I2C bus to get the CommunicationWatchdogTimer(CWDT) period.
-        
-        Returns:
-            float: The CommunicationWatchdogTimer period value in seconds
-        
-        """
-        return float(self._i2c_hat._get_u32_value_(Command.CWDT_GET_PERIOD)) / 1000
-
-    @period.setter
-    def period(self, value):
-        """Sends a request over the I2C bus to set the CommunicationWatchdogTimer(CWDT) period.
-        The I2C-HAT CWDT will be disabled if the period is set to zero, a value greather than zero will enable it. 
-        
-        Args:
-            value(float): The CommunicationWatchdogTimer period value in seconds
-        
-        """
-        if value < 0:
-            raise ValueError("Period should be greather than zero to enable the CommunicationWatchdogTimer on the I2C-HAT board")
-        
-        self._i2c_hat._set_u32_value_(Command.CWDT_SET_PERIOD, int(value * 1000))
-        #self.cwdt_feed_thread.update() # command for CWDT thread to update/read the CWDT period
 

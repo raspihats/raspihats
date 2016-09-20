@@ -4,6 +4,16 @@ This module contains the I2C-HATs classes.
 from ._i2c_hat import I2CHat, Cwdt
 from ._digital import DigitalOutputs, DigitalInputs
 
+def set_i2c_port(i2c_port):
+    """Set the I2C port number.
+            
+    Args:
+        i2c_port (int): I2C port number
+    
+    """
+    import smbus
+    I2CHat._i2c_bus = smbus.SMBus(i2c_port)
+
 class Di16(I2CHat):
     """This class exposes all operations supported by the Di16 I2C-HAT.
     

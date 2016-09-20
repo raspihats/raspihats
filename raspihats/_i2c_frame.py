@@ -5,11 +5,11 @@ from .crc16 import calc
 
 
 class I2CFrameDecodeException(Exception):
-    """Raised when I2CFrame.decode() fails."""
+    """Raised when I2C Frame decoding fails."""
 
 class I2CFrame(object):
-    """The I2CFrame is used for reliable communication over the I2C bus:
-    
+    """The I2CFrame is used for communication over the I2C bus:
+        
     +----+---------+------+------------------------------------------------------------------------------------------+
     | #  | Field   | Size | Description                                                                              |
     +====+=========+======+==========================================================================================+
@@ -22,6 +22,11 @@ class I2CFrame(object):
     | 4. | Crc     | 2    | Modbus CRC16 for data integrity.                                                         |
     +----+---------+------+------------------------------------------------------------------------------------------+
     
+    Args:
+        fid (:obj:`int`): Frame ID byte
+        cmd (:obj:`int`): Frame Command byte
+        data (:obj:`list` of :obj:`int`): Payload data bytes
+    
     """
     
     # byte size for fields
@@ -30,14 +35,6 @@ class I2CFrame(object):
     CRC_SIZE = 2
 
     def __init__(self, id_, cmd, data = []):
-        """Build I2CFrame object setting Id, Command, and Data Fields, check if all values are valid uint8 first.
-        
-        Args:
-            fid(int): Frame ID byte
-            cmd(int): Frame Command byte
-            data(List[int]): Payload data bytes
-        
-        """
         self.__check_uint8(id_)
         self.__check_uint8(cmd)
         self.__check_uint8(data)
@@ -64,39 +61,24 @@ class I2CFrame(object):
 
     @property
     def id(self):
-        """Get the frame Id byte.
-        
-        Returns:
-            int: The frame Id byte value
-            
-        """
+        """:obj:`int`: ID byte"""
         return self.__id
 
     @property
     def cmd(self):
-        """Get the frame Command byte.
-        
-        Returns:
-            int: The frame Command byte value
-            
-        """
+        """:obj:`int`: Command byte"""
         return self.__cmd
 
     @property
     def data(self):
-        """Get the frame payload data.
-        
-        Returns:
-            List[int]: The Data field which conatins the payload data bytes
-            
-        """
+        """(:obj:`list` of :obj:`int`): Payload data bytes"""
         return self.__data
     
     def encode(self):
         """Encode the frame fields: Id, Command, Data and Crc to a list of ints.
         
         Returns:
-            List[int]: List of frame bytes, raw data that can be transmitted over the I2C bus
+            :obj:`list` of :obj:`int`: List of frame bytes, raw data that can be transmitted over the I2C bus
             
         """
         data = [self.__id, self.__cmd] + self.__data
@@ -108,10 +90,10 @@ class I2CFrame(object):
         because a valid I2C-HAT response always has the same Id and Command bytes as the request. 
         
         Args:
-            data (List[int]): Raw I2C data to be decoded
+            data (:obj:`list` of :obj:`int`): Raw I2C data to be decoded
         
         Raises:
-            I2CFrameDecodeException: If the response frame Crc check fails, or has an unexpected Id or Command
+            :obj:`I2CFrameDecodeException`: If the response frame Crc check fails, or has an unexpected Id or Command
             
         """
         self.__check_uint8(data)

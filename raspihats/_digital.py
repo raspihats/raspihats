@@ -5,7 +5,7 @@ class DigitalInputs(I2CHatModule):
     """Attributes and methods needed for operating the digital inputs channels.
     
     Args:
-        i2c_hat (:obj:`raspihats._i2c_hat.I2CHat`): board
+        i2c_hat (:obj:`raspihats._i2c_hat.I2CHat`): I2CHat instance
         labels (:obj:`list` of :obj:`str`): Labels of digital input channels
         
     Attributes:
@@ -85,7 +85,7 @@ class DigitalOutputs(I2CHatModule):
     """Attributes and methods needed for operating the digital outputs channels.
 
     Args:
-        i2c_hat (:obj:`raspihats._i2c_hat.I2CHat`): board
+        i2c_hat (:obj:`raspihats._i2c_hat.I2CHat`): I2CHat instance
         labels (:obj:`list` of :obj:`str`): Labels of digital output channels
         
     Attributes:
@@ -122,11 +122,6 @@ class DigitalOutputs(I2CHatModule):
                 return len(outer_instance.labels)
         
         self.channels = Channels()
-        
-    def _validate_value(self, value):
-        max_value = (0x01 << len(self.labels)) - 1
-        if not (0 <= value <= max_value):
-            raise ValueError("'" + str(value) + "' is not a valid value, is [0x00 .. " + hex(max_value) + "]")
         
     @property
     def value(self):
