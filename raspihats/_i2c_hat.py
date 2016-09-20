@@ -50,7 +50,7 @@ class I2CHat(object):
     """Implements basic functionality common to all I2C-HATs.
     
     Args:
-        address (int): I2C bus address, valid range is depends of base_address
+        address (int): I2C bus address, valid range depends of base_address
         base_address (int): I2C-HAT family starting address
         board_name (str): I2C-HAT expected board name
         
@@ -69,16 +69,17 @@ class I2CHat(object):
         print("I2C port not found!")
     
     def __init__(self, address, base_address=None, board_name=None):
+        self.__address = address
+        self.__frame_id = 0x1F - 1
+        self.__transfer_time = None
+        
         if base_address == None:
             if not 0 <= address <= 127:
                 raise ValueError("I2C address should be in range[0, 127]")
         else:
             if address & base_address != base_address:
                 raise ValueError("I2C address should be in range[" + hex(base_address) + ", " + hex(base_address + 0x0F) + "]")
-
-        self.__address = address
-        self.__frame_id = 0x1F - 1
-        
+            
         if board_name != None:
             if self.name not in board_name:
                 raise Exception("Unexpected board name: " + self.name + ", expecting: " + board_name)
@@ -137,6 +138,7 @@ class I2CHat(object):
                     # build response frame
                     response_frame = I2CFrame(request_frame.id, request_frame.cmd)
                     response_frame.decode(response_data)
+                    self.__transfer_time = time.time()
                     return response_frame
                 except Exception as ex:
                     exceptions.append(ex)
@@ -200,6 +202,11 @@ class I2CHat(object):
             
         """
         return I2CFrame(self._generate_frame_id_(), cmd, data)
+
+    @property
+    def transfer_time(self):
+        """:obj:`float`: Last valid transfer time stamp."""
+        return self.__transfer_time
     
     @property
     def address(self):
@@ -282,7 +289,7 @@ class I2CHatModule(object):
 
 
 class CwdtFeedThread(threading.Thread):
-    """***"""
+    """"""
     
     def __init__(self):
         threading.Thread.__init__(self)
@@ -343,7 +350,7 @@ class Cwdt(I2CHatModule):
 
     @property
     def period(self):
-        """:obj:`int`: The CommunicationWatchdogTimer period value in seconds(*)."""
+        """:obj:`float`: The CommunicationWatchdogTimer period value in seconds(*)."""
         return float(self._i2c_hat._get_u32_value_(Command.CWDT_GET_PERIOD)) / 1000
 
     @period.setter
