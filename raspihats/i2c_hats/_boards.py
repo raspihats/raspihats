@@ -1,7 +1,7 @@
 """
 This module contains the I2C-HATs classes.
 """
-from ._i2c_hat import I2CHat, Cwdt
+from ._base import I2CHat, Cwdt
 from ._digital import DigitalOutputs, DigitalInputs
 
 def set_i2c_port(i2c_port):
