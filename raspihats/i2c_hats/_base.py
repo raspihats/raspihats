@@ -5,7 +5,7 @@ import sys
 import time
 import smbus
 import threading
-from ._i2c_frame import I2CFrame
+from ._frame import I2CFrame
 is_py2 = sys.version[0] == '2'
 if is_py2:
     import Queue as queue
@@ -15,25 +15,25 @@ else:
 class Command(object) :
     """I2C-HAT commands""" 
     
-    # General Board Commands
+    # common board commands
     GET_BOARD_NAME = 0x10
     GET_FIRMWARE_VERSION = 0x11
     GET_STATUS_WORD = 0x12
     RESET = 0x13
     
-    # Communication WatchDog Commands
+    # Communication WatchDog commands
     CWDT_SET_PERIOD = 0x14
     CWDT_GET_PERIOD = 0x15
     CWDT_SET_STATE = 0x16
     
-    # Digital Inputs Commands
+    # Digital Inputs commands
     DI_GET_ALL_CHANNEL_STATES = 0x20
     DI_GET_CHANNEL_STATE = 0x21
     DI_GET_COUNTER = 0x22
     DI_RESET_COUNTER = 0x23
     DI_RESET_ALL_COUNTERS = 0x24
     
-    # Digital Outputs Commands
+    # Digital Outputs commands
     DO_SET_POWER_ON_VALUE = 0x30
     DO_GET_POWER_ON_VALUE = 0x31
     DO_SET_SAFETY_VALUE = 0x32
@@ -266,7 +266,7 @@ class I2CHatModule(object):
         label = None
         if isinstance(index, int):
             if not (0 <= index < len(self.__labels)):
-                raise ValueError("'" + str(index) + "' is not a valid channel index")
+                raise IndexError("'" + str(index) + "' is not a valid channel index")
         elif isinstance(index, str):
             label = index
             try:

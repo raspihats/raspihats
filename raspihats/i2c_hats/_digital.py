@@ -1,4 +1,4 @@
-from ._i2c_hat import Command, I2CHatModule, I2CHatResponseException
+from ._base import Command, I2CHatModule, I2CHatResponseException
 
 
 class DigitalInputs(I2CHatModule):
@@ -97,7 +97,7 @@ class DigitalOutputs(I2CHatModule):
         I2CHatModule.__init__(self, i2c_hat, labels)
         outer_instance = self
         
-        class Channels(object):
+        class Channels(object):            
             def __getitem__(self, index):
                 index = outer_instance._validate_channel_index(index)
                 request = outer_instance._i2c_hat._request_frame_(Command.DO_GET_CHANNEL_STATE, [index])

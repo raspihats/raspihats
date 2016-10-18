@@ -1,7 +1,7 @@
 """
 This module contains the I2CFrame class and related classes.
 """
-from .crc16 import calc
+from .. import crc16
 
 
 class I2CFrameDecodeException(Exception):
@@ -82,7 +82,7 @@ class I2CFrame(object):
             
         """
         data = [self.__id, self.__cmd] + self.__data
-        crc = calc(data) 
+        crc = crc16.modbus(data) 
         return data + [(crc & 0xFF), ((crc >> 8) & 0xFF)]
     
     def decode(self, data):
@@ -97,11 +97,11 @@ class I2CFrame(object):
             
         """
         self.__check_uint8(data)
-        crc = calc(data[:-2])
+        crc = crc16.modbus(data[:-2])
         if crc != (data[-1] << 8) + data[-2]:
-            raise I2CFrameDecodeException('Crc check failed')
+            raise I2CFrameDecodeException('crc check failed')
         if self.__id != data[0]:
-            raise I2CFrameDecodeException('unexpected Id')
+            raise I2CFrameDecodeException('unexpected id')
         if self.__cmd != data[1]:
-            raise I2CFrameDecodeException('unexpected Command')
+            raise I2CFrameDecodeException('unexpected command')
         self.__data = data[2:-2]
