@@ -27,7 +27,7 @@ setup(
     author           = 'Florin Costa',
     author_email     = 'hardhat@raspihats.com',
     keywords         = 'Raspberry Pi hats add-on boards',
-    packages         = ['raspihats'],
+    packages         = ['raspihats', 'raspihats/i2c_hats'],
     classifiers      = ['Development Status :: 5 - Production/Stable',
                            'Operating System :: POSIX :: Linux',
                            'License :: OSI Approved :: MIT License',
