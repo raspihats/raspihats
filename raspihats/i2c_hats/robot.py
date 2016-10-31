@@ -1,4 +1,4 @@
-from .i2c_hats import Di16, Di6Rly6, Rly10
+from ._boards import Di16, Di6Rly6, Rly10
 """
 This module facilitates the raspihats.i2c_hats package integration with robotframework.
 All the following functions will be loaded as keywords by robotframework.
