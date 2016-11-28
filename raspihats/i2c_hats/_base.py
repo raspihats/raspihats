@@ -6,11 +6,6 @@ import time
 import smbus
 import threading
 from ._frame import I2CFrame
-is_py2 = sys.version[0] == '2'
-if is_py2:
-    import Queue as queue
-else:
-    import queue as queue
 
 class Command(object) :
     """I2C-HAT commands""" 
@@ -245,7 +240,7 @@ class I2CHat(object):
 
 
 class I2CHatModule(object):
-    """ I2C-HAT module base.
+    """I2C-HAT module base.
     
     Args:
         i2c_hat (:obj:`raspihats._i2c_hat.I2CHat`): I2CHat instance
@@ -280,59 +275,12 @@ class I2CHatModule(object):
     def _validate_value(self, value):
         max_value = (0x01 << len(self.__labels)) - 1
         if not (0 <= value <= max_value):
-            raise ValueError("'" + str(value) + "' is not a valid value, is [0x00 .. " + hex(max_value) + "]")
+            raise ValueError("'" + str(value) + "' is not a valid value, range is [0x00 .. " + hex(max_value) + "]")
     
     @property
     def labels(self):
         """:obj:`list` of :obj:`str`: Channel Labels."""
         return self.__labels
-
-
-class CwdtFeedThread(threading.Thread):
-    """"""
-    
-    def __init__(self):
-        threading.Thread.__init__(self)
-        self.cmd_queue = queue.Queue()
-        self.ex_queue = queue.Queue()
-    
-    def stop(self):
-        """Send command to stop the thread that is feeding the CommunicationWatchdogTimer."""
-        self.cmd_queue.put('stop')
-        
-    def update(self):
-        """Send command to thread to update it's copy of CommunicationWatchdogTimer period."""
-        self.cmd_queue.put('update')
-    
-    def run(self):
-        """Feeds the CommunicationWatchdogTimer."""
-        
-        # clear queue
-        while not self.cmd_queue.empty():
-            self.cmd_queue.get()
-        
-        run_flag = True
-        feed_period = 0.0
-        feed_time = 0.0
-        while run_flag:
-            if time.time() - feed_time > feed_period:
-                try:
-                    # feed CWDT and read period
-                    feed_time = time.time()
-                    feed_period = self.get_cwdt_period() * 0.5
-                except Exception as e:
-                    # communication lost
-                    self.ex_queue.put(e)
-                    run_flag = False
-            try:
-                # start_time = time.time()
-                cmd = self.cmd_queue.get(block=True, timeout=0.01)
-                if 'stop' in cmd:
-                    run_flag = False
-                if 'update' in cmd:
-                    feed_period = 0 # this forces a read/update of the CWDT period
-            except queue.Empty:
-                pass
             
 class Cwdt(I2CHatModule):
     """Provides attributes and methods for operating the I2C-HAT CommunicationWatchdogTimer module.
@@ -346,7 +294,6 @@ class Cwdt(I2CHatModule):
     
     def __init__(self, i2c_hat):
         I2CHatModule.__init__(self, i2c_hat)
-        self.__feed_thread = CwdtFeedThread()
 
     @property
     def period(self):
@@ -356,28 +303,6 @@ class Cwdt(I2CHatModule):
     @period.setter
     def period(self, value):
         if value < 0:
-            raise ValueError("Period should be greather than zero to enable the CommunicationWatchdogTimer on the I2C-HAT board")
-        
+            raise ValueError("period should be greather than zero to enable the CommunicationWatchdogTimer on the I2C-HAT board")
         self._i2c_hat._set_u32_value_(Command.CWDT_SET_PERIOD, int(value * 1000))
-        #self.cwdt_feed_thread.update() # command for CWDT thread to update/read the CWDT period
-        
-    def start_feed_thread(self):
-        """Starts the CommunicationWatchdogTimer feed thread and sets the I2C-HAT board CommunicationWatchdogTimer period.
-        
-        Args:
-            period (float): CommunicationWatchdogTimer period in seconds
-        
-        Raises:
-            ValueError: If period is not greather than zero, a period greather than is required zero to enable the CommunicationWatchdogTimer on the I2C-HAT board.
-        
-        """
-        if period < 0:
-            raise ValueError("Period should be greather than zero to enable the CommunicationWatchdogTimer on the I2C-HAT board")
-        self.set_cwdt_period(period)
-        #self.start()
-                
-    def stop_feed_thread(self):
-        """Sends comand to stop the CommunicationWatchdogTimer feed thread disables it."""
-        self.set_cwdt_period(0)
-        self.cwdt_feed_thread.stop()
 
