@@ -1,1 +1,1 @@
-from ._boards import (Di16, Rly10, Di6Rly6)
+from ._boards import (Di16, Rly10, Di6Rly6, DQ16oc)
