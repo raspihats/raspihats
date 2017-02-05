@@ -9,7 +9,7 @@ class I2CFrameDecodeException(Exception):
 
 class I2CFrame(object):
     """The I2CFrame is used for communication over the I2C bus:
-        
+
     +----+---------+------+------------------------------------------------------------------------------------------+
     | #  | Field   | Size | Description                                                                              |
     +====+=========+======+==========================================================================================+
@@ -21,87 +21,56 @@ class I2CFrame(object):
     +----+---------+------+------------------------------------------------------------------------------------------+
     | 4. | Crc     | 2    | Modbus CRC16 for data integrity.                                                         |
     +----+---------+------+------------------------------------------------------------------------------------------+
-    
+
     Args:
-        fid (:obj:`int`): Frame ID byte
-        cmd (:obj:`int`): Frame Command byte
+        id (:obj:`int`): ID byte
+        cmd (:obj:`int`): Command byte
         data (:obj:`list` of :obj:`int`): Payload data bytes
-    
+
+    Attributes:
+        id (:obj:`int`): ID byte
+        cmd (:obj:`int`): Command byte
+        data (:obj:`list` of :obj:`int`): Payload data bytes
+
     """
-    
+
     # byte size for fields
     ID_SIZE = 1
     CMD_SIZE = 1
     CRC_SIZE = 2
 
-    def __init__(self, id_, cmd, data = []):
-        self.__check_uint8(id_)
-        self.__check_uint8(cmd)
-        self.__check_uint8(data)
-        
-        self.__id = id_
-        self.__cmd = cmd
-        self.__data = data
-        
-    def __check_uint8(self, data):
-        """Check if data is valid uint8 value or a list of uint8 values.
-        
-        Args:
-            data(int or List[int]): A uint8 value or a list of uint8 values
-        
-        Raises:
-            ValueError: If data is not a uint8 valid value, or a list of uint8 values
-            
-        """
-        if isinstance(data, int):
-            data = [data]
-        for byte in data:
-            if not 0 <= byte <= 0xFF:
-                raise ValueError("expecting uint8 value")
+    def __init__(self, id, cmd, data = []):
+        self.id = id
+        self.cmd = cmd
+        self.data = data
 
-    @property
-    def id(self):
-        """:obj:`int`: ID byte"""
-        return self.__id
-
-    @property
-    def cmd(self):
-        """:obj:`int`: Command byte"""
-        return self.__cmd
-
-    @property
-    def data(self):
-        """(:obj:`list` of :obj:`int`): Payload data bytes"""
-        return self.__data
-    
     def encode(self):
         """Encode the frame fields: Id, Command, Data and Crc to a list of ints.
-        
+
         Returns:
             :obj:`list` of :obj:`int`: List of frame bytes, raw data that can be transmitted over the I2C bus
-            
+
         """
-        data = [self.__id, self.__cmd] + self.__data
-        crc = crc16.modbus(data) 
+        data = [self.id, self.cmd] + self.data
+        crc = crc16.modbus(data)
         return data + [(crc & 0xFF), ((crc >> 8) & 0xFF)]
-    
+
     def decode(self, data):
         """Decode raw data from I2C bus. It's used to decode the I2C-HATs response. The fields Id and Command should already be set
-        because a valid I2C-HAT response always has the same Id and Command bytes as the request. 
-        
+        because a valid I2C-HAT response always has the same Id and Command bytes as the request.
+
         Args:
             data (:obj:`list` of :obj:`int`): Raw I2C data to be decoded
-        
+
         Raises:
             :obj:`I2CFrameDecodeException`: If the response frame Crc check fails, or has an unexpected Id or Command
-            
+
         """
-        self.__check_uint8(data)
         crc = crc16.modbus(data[:-2])
         if crc != (data[-1] << 8) + data[-2]:
             raise I2CFrameDecodeException('crc check failed')
-        if self.__id != data[0]:
+        if self.id != data[0]:
             raise I2CFrameDecodeException('unexpected id')
-        if self.__cmd != data[1]:
+        if self.cmd != data[1]:
             raise I2CFrameDecodeException('unexpected command')
-        self.__data = data[2:-2]
+        self.data = data[2:-2]
