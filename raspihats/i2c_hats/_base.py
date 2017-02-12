@@ -243,7 +243,7 @@ class I2CHatModule(object):
     """I2C-HAT module base.
 
     Args:
-        i2c_hat (:obj:`raspihats._i2c_hat.I2CHat`): I2CHat instance
+        i2c_hat (:obj:`raspihats.i2c_hats._base.I2CHat`): I2CHat instance
         labels (:obj:`list` of :obj:`str` or optional): Channel labels
 
     """
@@ -286,7 +286,7 @@ class Cwdt(I2CHatModule):
     """Provides attributes and methods for operating the I2C-HAT CommunicationWatchdogTimer module.
 
     Args:
-        i2c_hat (:obj:`raspihats._i2c_hat.I2CHat`): I2CHat instance
+        i2c_hat (:obj:`raspihats.i2c_hats._base.I2CHat`): I2CHat instance
 
     (*) - attribute value read directly from I2C-HAT
 

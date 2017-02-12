@@ -12,38 +12,45 @@ raspihats.crc16 module
     :undoc-members:
     :show-inheritance:
 
-raspihats._i2c_frame module
----------------------------
+raspihats.i2c_hats._frame module
+--------------------------------
 
-.. automodule:: raspihats._i2c_frame
+.. automodule:: raspihats.i2c_hats._frame
     :members:
     :undoc-members:
     :show-inheritance:
 
-raspihats._i2c_hat module
--------------------------
+raspihats.i2c_hats._base module
+-------------------------------
 
-.. automodule:: raspihats._i2c_hat
-    :members:
-    :undoc-members:
-    :show-inheritance:
-    
-raspihats._digital module
--------------------------
-
-.. automodule:: raspihats._digital
+.. automodule:: raspihats.i2c_hats._base
     :members:
     :undoc-members:
     :show-inheritance:
 
-raspihats.i2c_hats module
--------------------------
+raspihats.i2c_hats._digital module
+----------------------------------
 
-.. automodule:: raspihats.i2c_hats
+.. automodule:: raspihats.i2c_hats._digital
     :members:
     :undoc-members:
     :show-inheritance:
 
+raspihats.i2c_hats._boards module
+---------------------------------
+
+.. automodule:: raspihats.i2c_hats._boards
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+raspihats.i2c_hats.robot module
+-------------------------------
+
+.. automodule:: raspihats.i2c_hats.robot
+    :members:
+    :undoc-members:
+    :show-inheritance:
 
 Module contents
 ---------------
