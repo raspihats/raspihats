@@ -21,8 +21,8 @@ class Di16(I2CHat):
         address (:obj:`int`): I2C bus address, valid range is [0x40, 0x4F]
 
     Attributes:
-        cwdt (:obj:`raspihats._i2c_hat.Cwdt`): provides access to CommunicationWatchDogTimer.
-        di (:obj:`raspihats._digital.DigitalInputs`): provides access to DigitalInputs.
+        cwdt (:obj:`raspihats.i2c_hats._base.Cwdt`): provides access to CommunicationWatchDogTimer.
+        di (:obj:`raspihats.i2c_hats._digital.DigitalInputs`): provides access to DigitalInputs.
 
     """
 
@@ -47,8 +47,8 @@ class Rly10(I2CHat):
         address (:obj:`int`): I2C bus address, valid range is [0x50, 0x5F]
 
     Attributes:
-        cwdt (:obj:`raspihats._i2c_hat.Cwdt`): provides access to CommunicationWatchDogTimer.
-        do (:obj:`raspihats._digital.DigitalOutputs`): provides access to DigitalOutputs.
+        cwdt (:obj:`raspihats.i2c_hats._base.Cwdt`): provides access to CommunicationWatchDogTimer.
+        dq (:obj:`raspihats.i2c_hats._digital.DigitalOutputs`): provides access to DigitalOutputs.
     """
 
     _BASE_ADDRESS = 0x50
@@ -58,7 +58,7 @@ class Rly10(I2CHat):
     def __init__(self, address):
         I2CHat.__init__(self, address, self._BASE_ADDRESS, self._BOARD_NAME)
         self.cwdt = Cwdt(self)
-        self.do = DigitalOutputs(self, self._labels)
+        self.dq = DigitalOutputs(self, self._labels)
 
 class Di6Rly6(I2CHat):
     """This class exposes all operations supported by the Di6Rly6 I2C-HAT.
@@ -67,22 +67,22 @@ class Di6Rly6(I2CHat):
         address (:obj:`int`): I2C bus address, valid range is [0x60, 0x6F]
 
     Attributes:
-        cwdt (:obj:`raspihats._i2c_hat.Cwdt`): provides access to CommunicationWatchDogTimer.
-        di (:obj:`raspihats._digital.DigitalInputs`): provides access to DigitalInputs.
-        do (:obj:`raspihats._digital.DigitalOutputs`): provides access to DigitalOutputs.
+        cwdt (:obj:`raspihats.i2c_hats._base.Cwdt`): provides access to CommunicationWatchDogTimer.
+        di (:obj:`raspihats.i2c_hats._digital.DigitalInputs`): provides access to DigitalInputs.
+        dq (:obj:`raspihats.i2c_hats._digital.DigitalOutputs`): provides access to DigitalOutputs.
 
     """
 
     _BASE_ADDRESS = 0x60
     _BOARD_NAME = 'Di6Rly6 I2C-HAT'
     _di_labels = ['Di1.1', 'Di1.2', 'Di1.3', 'Di1.4', 'Di1.5', 'Di1.6']
-    _do_labels = ['Rly1', 'Rly2', 'Rly3', 'Rly4', 'Rly5', 'Rly6']
+    _dq_labels = ['Rly1', 'Rly2', 'Rly3', 'Rly4', 'Rly5', 'Rly6']
 
     def __init__(self, address):
         I2CHat.__init__(self, address, self._BASE_ADDRESS, self._BOARD_NAME)
         self.cwdt = Cwdt(self)
         self.di = DigitalInputs(self, self._di_labels)
-        self.do = DigitalOutputs(self, self._do_labels)
+        self.dq = DigitalOutputs(self, self._dq_labels)
 
 class DI16ac(I2CHat):
     """This class exposes all operations supported by the DI16ac I2C-HAT.
@@ -91,8 +91,8 @@ class DI16ac(I2CHat):
         address (:obj:`int`): I2C bus address, valid range is [0x40, 0x4F]
 
     Attributes:
-        cwdt (:obj:`raspihats._i2c_hat.Cwdt`): provides access to CommunicationWatchDogTimer.
-        di (:obj:`raspihats._digital.DigitalInputs`): provides access to DigitalInputs.
+        cwdt (:obj:`raspihats.i2c_hats._base.Cwdt`): provides access to CommunicationWatchDogTimer.
+        di (:obj:`raspihats.i2c_hats._digital.DigitalInputs`): provides access to DigitalInputs.
 
     """
 
@@ -113,8 +113,8 @@ class DQ16oc(I2CHat):
         address (:obj:`int`): I2C bus address, valid range is [0x50, 0x5F]
 
     Attributes:
-        cwdt (:obj:`raspihats._i2c_hat.Cwdt`): provides access to CommunicationWatchDogTimer.
-        do (:obj:`raspihats._digital.DigitalOutputs`): provides access to DigitalOutputs.
+        cwdt (:obj:`raspihats.i2c_hats._base.Cwdt`): provides access to CommunicationWatchDogTimer.
+        dq (:obj:`raspihats.i2c_hats._digital.DigitalOutputs`): provides access to DigitalOutputs.
     """
 
     _BASE_ADDRESS = 0x50
@@ -124,7 +124,7 @@ class DQ16oc(I2CHat):
     def __init__(self, address):
         I2CHat.__init__(self, address, self._BASE_ADDRESS, self._BOARD_NAME)
         self.cwdt = Cwdt(self)
-        self.do = DigitalOutputs(self, self._labels)
+        self.dq = DigitalOutputs(self, self._labels)
 
 class DQ10rly(I2CHat):
     """This class exposes all operations supported by the DQ10rly I2C-HAT.
@@ -133,8 +133,8 @@ class DQ10rly(I2CHat):
         address (:obj:`int`): I2C bus address, valid range is [0x50, 0x5F]
 
     Attributes:
-        cwdt (:obj:`raspihats._i2c_hat.Cwdt`): provides access to CommunicationWatchDogTimer.
-        do (:obj:`raspihats._digital.DigitalOutputs`): provides access to DigitalOutputs.
+        cwdt (:obj:`raspihats.i2c_hats._base.Cwdt`): provides access to CommunicationWatchDogTimer.
+        dq (:obj:`raspihats.i2c_hats._digital.DigitalOutputs`): provides access to DigitalOutputs.
     """
 
     _BASE_ADDRESS = 0x50
@@ -144,7 +144,7 @@ class DQ10rly(I2CHat):
     def __init__(self, address):
         I2CHat.__init__(self, address, self._BASE_ADDRESS, self._BOARD_NAME)
         self.cwdt = Cwdt(self)
-        self.do = DigitalOutputs(self, self._labels)
+        self.dq = DigitalOutputs(self, self._labels)
 
 class DI6acDQ6rly(I2CHat):
     """This class exposes all operations supported by the DI6acDQ6rly I2C-HAT.
@@ -153,19 +153,19 @@ class DI6acDQ6rly(I2CHat):
         address (:obj:`int`): I2C bus address, valid range is [0x60, 0x6F]
 
     Attributes:
-        cwdt (:obj:`raspihats._i2c_hat.Cwdt`): provides access to CommunicationWatchDogTimer.
-        di (:obj:`raspihats._digital.DigitalInputs`): provides access to DigitalInputs.
-        do (:obj:`raspihats._digital.DigitalOutputs`): provides access to DigitalOutputs.
+        cwdt (:obj:`raspihats.i2c_hats._base.Cwdt`): provides access to CommunicationWatchDogTimer.
+        di (:obj:`raspihats.i2c_hats._digital.DigitalInputs`): provides access to DigitalInputs.
+        dq (:obj:`raspihats.i2c_hats._digital.DigitalOutputs`): provides access to DigitalOutputs.
 
     """
 
     _BASE_ADDRESS = 0x60
     _BOARD_NAME = 'DI6acDQ6rly I2C-HAT'
     _di_labels = ['I0', 'I1', 'I2', 'I3', 'I4', 'I5']
-    _do_labels = ['Q0', 'Q1', 'Q2', 'Q3', 'Q4', 'Q5']
+    _dq_labels = ['Q0', 'Q1', 'Q2', 'Q3', 'Q4', 'Q5']
 
     def __init__(self, address):
         I2CHat.__init__(self, address, self._BASE_ADDRESS, self._BOARD_NAME)
         self.cwdt = Cwdt(self)
         self.di = DigitalInputs(self, self._di_labels)
-        self.do = DigitalOutputs(self, self._do_labels)
+        self.dq = DigitalOutputs(self, self._dq_labels)
