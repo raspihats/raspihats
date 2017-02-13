@@ -1,16 +1,5 @@
-raspihats package
-=================
-
-Submodules
-----------
-
-raspihats.crc16 module
-----------------------
-
-.. automodule:: raspihats.crc16
-    :members:
-    :undoc-members:
-    :show-inheritance:
+raspihats.i2c_hats subpackage
+=============================
 
 raspihats.i2c_hats._frame module
 --------------------------------
@@ -48,14 +37,6 @@ raspihats.i2c_hats.robot module
 -------------------------------
 
 .. automodule:: raspihats.i2c_hats.robot
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-Module contents
----------------
-
-.. automodule:: raspihats
     :members:
     :undoc-members:
     :show-inheritance:

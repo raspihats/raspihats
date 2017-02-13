@@ -1,7 +1,10 @@
-raspihats
-=========
+modules
+=======
 
-.. toctree::
-   :maxdepth: 4
+raspihats.crc16 module
+----------------------
 
-   raspihats
+.. automodule:: raspihats.crc16
+    :members:
+    :undoc-members:
+    :show-inheritance:

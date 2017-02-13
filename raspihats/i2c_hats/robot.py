@@ -1,4 +1,3 @@
-from ._boards import Di16, Di6Rly6, Rly10
 """
 This module facilitates the raspihats.i2c_hats package integration with robotframework.
 All the following functions will be loaded as keywords by robotframework.
@@ -6,25 +5,26 @@ All the following functions will be loaded as keywords by robotframework.
 Example:
 
 *** Settings ***
-Documentation       Test Suite for Di6Rly6 I2C-HAT.
-Library             raspihats.i2c_hats_robot
+Documentation       Test Suite using DI6acDQ6rly I2C-HAT.
+Library             raspihats.i2c_hats.robot
 
 *** Test Cases ***
 
 Set Global Variables
-    ${i2c_hat_temp}     New Di6Rly6     ${0x60}
-    Set Global Variable     ${i2c_hat}      ${i2c_hat_temp}
+    ${i2c_hat_temp}         New DI6acDQ6rly     ${0x60}
+    Set Global Variable     ${i2c_hat}          ${i2c_hat_temp}
 
 Board Name
-    ${name}     Get Name    ${i2c_hat}
-    Should Be Equal As Strings      ${name}     Di6Rly6 I2C-HAT
+    ${name}                     Get Name    ${i2c_hat}
+    Should Be Equal As Strings  ${name}     Di6Rly6 I2C-HAT
 
 Read Digital Input
     ${state}    DO Get Channel      ${i2c_hat}      ${5}
-    Should Be Equal As Strings      ${state}    ${False}
-    Should Be Equal As Integers     ${state}    ${0}
+    Should Be Equal As Strings      ${state}        ${False}
+    Should Be Equal As Integers     ${state}        ${0}
 
 """
+from ._boards import Di16, Rly10, Di6Rly6, DI16ac, DQ10rly, DQ16oc, DI6acDQ6rly
 
 def new_Di16(adr):
     """New instance of class Di16. The exported robotframework keyword is 'New Di16'.
@@ -58,6 +58,50 @@ def new_Di6Rly6(adr):
             Di6Rly6: A new instance of Di6Rly6
     """
     return Di6Rly6(adr)
+
+def new_DI16ac(adr):
+    """New instance of class DI16ac. The exported robotframework keyword is 'New DI16ac'.
+
+        Args:
+            adr (int): i2c address
+
+        Returns:
+            DI16ac: A new instance of DI16ac
+    """
+    return DI16ac(adr)
+
+def new_DQ10rly(adr):
+    """New instance of class DQ10rly. The exported robotframework keyword is 'New DQ10rly'.
+
+        Args:
+            adr (int): i2c address
+
+        Returns:
+            DQ10rly: A new instance of DQ10rly
+    """
+    return DQ10rly(adr)
+
+def new_DQ16oc(adr):
+    """New instance of class DQ16oc. The exported robotframework keyword is 'New DQ16oc'.
+
+        Args:
+            adr (int): i2c address
+
+        Returns:
+            DQ16oc: A new instance of DQ16oc
+    """
+    return DQ16oc(adr)
+
+def new_DI6acDQ6rly(adr):
+    """New instance of class DI6acDQ6rly. The exported robotframework keyword is 'New DI6acDQ6rly'.
+
+        Args:
+            adr (int): i2c address
+
+        Returns:
+            DI6acDQ6rly: A new instance of DI6acDQ6rly
+    """
+    return DI6acDQ6rly(adr)
 
 def get_name(i2c_hat):
     """Gets the I2C-HAT name. The exported robotframework keyword is 'Get Name'.
