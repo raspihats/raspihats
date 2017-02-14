@@ -77,7 +77,7 @@ class I2CHat(object):
 
         if board_name != None:
             if self.name not in board_name:
-                raise Exception("Unexpected board name: " + self.name + ", expecting: " + board_name)
+                raise Exception("Unexpected board name '" + self.name + "', expecting '" + board_name + "'")
 
     def __str__(self):
         return self.name + " adr: " + hex(self._address)
