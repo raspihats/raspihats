@@ -3,7 +3,7 @@ from os import chdir, getcwd, system
 from setuptools import setup
 from setuptools.command.install import install
 
-    
+
 # Build and install the clock stretch timeout script automatically during setup
 class ClockStretchTimeoutInstall(install):
     def run(self):
@@ -15,16 +15,16 @@ class ClockStretchTimeoutInstall(install):
             print ("Warning: clock stretch timeout setup failed! " + str(e))
         finally:
             chdir(cwd)
-            install.run(self) 
+            install.run(self)
 
 setup(
-    name             = 'raspihats',   
+    name             = 'raspihats',
     version          = '2.0.0',
     description      = 'package for controlling raspihats.com boards',
     long_description = open('README.rst').read(),
     license          = open('LICENSE').read(),
     url              = 'https://github.com/raspihats/raspihats',
-    author           = 'Florin Costa',
+    author           = 'Florin COSTA',
     author_email     = 'hardhat@raspihats.com',
     keywords         = 'Raspberry Pi hats add-on boards',
     packages         = ['raspihats', 'raspihats/i2c_hats'],
