@@ -88,6 +88,7 @@ v2.0.0
 v1.1.1
 ~~~~~~
   - Added support for new boards:
+  
     - Di16_
     - Rly10_
     - Di6Rly6_
