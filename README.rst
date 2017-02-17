@@ -69,28 +69,28 @@ Listing attributes and methods(from v2.0.0)
     board.dq.labels               # get digital output labels
 
 Change Log
-==========
+----------
 
 v2.0.1
-------
+~~~~~~
   - Fixed I2C clock stretch timeout setup script
 
 v2.0.0
-------
+~~~~~~
   - Attributes are now used for accessing board parameters, rather then methods
   - Added support for new boards:
-  
+
     - DI16ac_ (replacement for Di16_)
     - DQ10rly_ (replacement for Rly10_)
     - DQ16oc_
     - DI6acDQ6rly_  (replacement for Di6Rly6_)
 
 v1.1.1
-------
-Added support for new boards:
-  - Di16_
-  - Rly10_
-  - Di6Rly6_
+~~~~~~
+  - Added support for new boards:
+    - Di16_
+    - Rly10_
+    - Di6Rly6_
 
 .. code-block:: python
 
