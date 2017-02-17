@@ -3,17 +3,6 @@ raspihats package
 
 This package provides the necessary code to interface the Raspberry Pi HATs(add-on boards) from raspihats.com_:
 
-
-v2.0.0
-------
-
-Added support for new boards:
-  - DI16ac_ (replacement for Di16_)
-  - DQ10rly_ (replacement for Rly10_)
-  - DQ16oc_
-  - DI6acDQ6rly_  (replacement for Di6Rly6_)
-
-
 Typical usage often looks like this:
 
 .. code-block:: python
@@ -30,7 +19,8 @@ Typical usage often looks like this:
         dq10rly.dq.channels[0] = state          # set digital output channel 0
         dq10rly.dq.channels[1] = not state      # set digital output channel 1
 
-Listing attributes and methods:
+Listing attributes and methods(from v2.0.0)
+-------------------------------------------
 
 .. code-block:: python
 
@@ -78,10 +68,25 @@ Listing attributes and methods:
     board.dq.safety_value = 0     # set digital output channels SafetyValue
     board.dq.labels               # get digital output labels
 
+Change Log
+==========
+
+v2.0.1
+------
+  - Fixed I2C clock stretch timeout setup script
+
+v2.0.0
+------
+  - Attributes are now used for accessing board parameters, rather then methods
+  - Added support for new boards:
+  
+    - DI16ac_ (replacement for Di16_)
+    - DQ10rly_ (replacement for Rly10_)
+    - DQ16oc_
+    - DI6acDQ6rly_  (replacement for Di6Rly6_)
 
 v1.1.1
 ------
-
 Added support for new boards:
   - Di16_
   - Rly10_
