@@ -5,40 +5,9 @@ import sys
 import time
 import smbus
 import threading
-from ._frame import I2CFrame
+from ._frame import Command, Frame, DecodeException
 
-class Command(object) :
-    """I2C-HAT commands"""
-
-    # common board commands
-    GET_BOARD_NAME = 0x10
-    GET_FIRMWARE_VERSION = 0x11
-    GET_STATUS_WORD = 0x12
-    RESET = 0x13
-
-    # Communication WatchDog commands
-    CWDT_SET_PERIOD = 0x14
-    CWDT_GET_PERIOD = 0x15
-    CWDT_SET_STATE = 0x16
-
-    # Digital Inputs commands
-    DI_GET_ALL_CHANNEL_STATES = 0x20
-    DI_GET_CHANNEL_STATE = 0x21
-    DI_GET_COUNTER = 0x22
-    DI_RESET_COUNTER = 0x23
-    DI_RESET_ALL_COUNTERS = 0x24
-
-    # Digital Outputs commands
-    DO_SET_POWER_ON_VALUE = 0x30
-    DO_GET_POWER_ON_VALUE = 0x31
-    DO_SET_SAFETY_VALUE = 0x32
-    DO_GET_SAFETY_VALUE = 0x33
-    DO_SET_ALL_CHANNEL_STATES = 0x34
-    DO_GET_ALL_CHANNEL_STATES = 0x35
-    DO_SET_CHANNEL_STATE = 0x36
-    DO_GET_CHANNEL_STATE = 0x37
-
-class I2CHatResponseException(Exception):
+class ResponseException(Exception):
     """Raised when there's a problem with the I2C-HAT response."""
 
 class I2CHat(object):
@@ -93,29 +62,27 @@ class I2CHat(object):
         self._frame_id &= 0xFF
         return self._frame_id
 
-    def _transfer_(self, request_frame, response_data_size, response_expected = True, number_of_tries = 5):
+    def _transfer_(self, request_frame, response_data_size, response_expected=True, number_of_tries=5):
         """Tries a number of times to send a request frame and to get a response frame over I2C bus.
 
         Args:
-            request_frame (I2CFrame): Request frame to be sent over the I2C bus
+            request_frame (Frame): Request frame to be sent over the I2C bus
             response_data_size (int): Expected response data size, this is the payload data size
             response_expected (bool): True if a respose is expected
             number_of_tries (int): Number of tries to get the response
 
         Returns:
-            I2CFrame: The response frame
+            Frame: The response frame
 
         Raises:
-            I2CHatResponseException: After all attempts to get a response have failed
+            ResponseException: After all attempts to get a response have failed
 
         """
         with I2CHat._i2c_bus_lock:
-            exceptions = []
-            try_cnt = 0
+            try_cnt = 1
             while True:
                 try:
                     request_data = request_frame.encode()
-                    # print request_data
 
                     # NOTE: write_i2c_block_data function is used to send commands to the I2C-HAT
                     I2CHat._i2c_bus.write_i2c_block_data(self._address, request_data[0], request_data[1:])
@@ -126,25 +93,25 @@ class I2CHat(object):
                     # NOTE: read_i2c_block_data function sends a i2c_write first, this write has a length of one, and the dummy_byte as payload, this
                     # write will be ignored by the I2C-HAT, after this a i2c_read will be issued, this i2c_read is used for reading the response
                     dummy_byte = 0xFF
-                    expected_response_size = I2CFrame.ID_SIZE + I2CFrame.CMD_SIZE + response_data_size + I2CFrame.CRC_SIZE
+                    expected_response_size = Frame.ID_SIZE + Frame.CMD_SIZE + response_data_size + Frame.CRC_SIZE
                     response_data = I2CHat._i2c_bus.read_i2c_block_data(self._address, dummy_byte, expected_response_size)
-                    # print response_data
 
                     # build response frame
-                    response_frame = I2CFrame(request_frame.id, request_frame.cmd)
+                    response_frame = Frame(request_frame.id, request_frame.cmd)
                     response_frame.decode(response_data)
                     self._transfer_time = time.time()
                     return response_frame
-                except Exception as ex:
-                    exceptions.append(ex)
+
+                except (IOError, DecodeException) as ex:
+                    if try_cnt >= number_of_tries:
+                        message = self.__class__.__name__ + "@" + hex(self.address) + ", "
+                        if isinstance(ex, IOError):
+                            message += "No response"
+                        else:
+                            message += str(ex)
+                        raise ResponseException(message)
+                    time.sleep(0.01)
                     try_cnt += 1
-                    if try_cnt < number_of_tries:
-                        time.sleep(0.01)
-                    else:
-                        message = ""
-                        for i in range(0, len(exceptions)):
-                            message += "try: " + str(i + 1) + " result: " + str(exceptions[i]) + "\n"
-                        raise I2CHatResponseException(message)
 
     def _get_u32_value_(self, cmd):
         """Generic get for a unsigned32 value.
@@ -156,14 +123,14 @@ class I2CHat(object):
             int: The desired unsigned32 value
 
         Raises:
-            I2CHatResponseException: If response has bad data length
+            ResponseException: If response has bad data length
 
         """
         request = self._request_frame_(cmd, [])
         response = self._transfer_(request, 4)
         data = response.data
         if len(data) != 4:
-            raise I2CHatResponseException('unexpected format')
+            raise ResponseException('Invalid response data length')
         return data[0] + (data[1] << 8) + (data[2] << 16) + (data[3] << 24)
 
     def _set_u32_value_(self, cmd, value):
@@ -177,13 +144,13 @@ class I2CHat(object):
             int: The desired unsigned32 value
 
         Raises:
-            I2CHatResponseException: If response has unexpected format
+            ResponseException: I response
         """
         data = [value & 0xFF, (value >> 8) & 0xFF, (value >> 16) & 0xFF, (value >> 24) & 0xFF]
         request = self._request_frame_(cmd, data)
         response = self._transfer_(request, 4)
         if data != response.data:
-            raise I2CHatResponseException('unexpected format')
+            raise ResponseException('Invalid response data')
 
     def _request_frame_(self, cmd, data = []):
         """Build request frame, taking care of new frame Id generation.
@@ -193,10 +160,10 @@ class I2CHat(object):
             data (List[int]): Frame payload data
 
         Returns:
-            I2CFrame: The new I2CFrame built with specified parameters
+            Frame: The new Frame built with specified parameters
 
         """
-        return I2CFrame(self._generate_frame_id_(), cmd, data)
+        return Frame(self._generate_frame_id_(), cmd, data)
 
     @property
     def transfer_time(self):
@@ -239,8 +206,8 @@ class I2CHat(object):
         self._transfer_(request, 0, False)
 
 
-class I2CHatModule(object):
-    """I2C-HAT module base.
+class Functionality(object):
+    """I2C-HAT functionality base.
 
     Args:
         i2c_hat (:obj:`raspihats.i2c_hats._base.I2CHat`): I2CHat instance
@@ -282,7 +249,7 @@ class I2CHatModule(object):
         """:obj:`list` of :obj:`str`: Channel Labels."""
         return self._labels
 
-class Cwdt(I2CHatModule):
+class Cwdt(Functionality):
     """Provides attributes and methods for operating the I2C-HAT CommunicationWatchdogTimer module.
 
     Args:
@@ -293,7 +260,7 @@ class Cwdt(I2CHatModule):
     """
 
     def __init__(self, i2c_hat):
-        I2CHatModule.__init__(self, i2c_hat)
+        Functionality.__init__(self, i2c_hat)
 
     @property
     def period(self):

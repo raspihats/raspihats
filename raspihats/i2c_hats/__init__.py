@@ -1,3 +1,4 @@
+from ._base import ResponseException
 from ._boards import (
     Di16,
     Rly10,
