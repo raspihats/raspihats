@@ -16,7 +16,7 @@ class ClockStretchTimeoutInstall(install):
 
 setup(
     name             = 'raspihats',
-    version          = '2.0.1',
+    version          = '2.1.0',
     description      = 'package for controlling raspihats.com boards',
     long_description = open('README.rst').read(),
     license          = open('LICENSE').read(),
@@ -25,6 +25,7 @@ setup(
     author_email     = 'hardhat@raspihats.com',
     keywords         = 'Raspberry Pi hats add-on boards',
     packages         = ['raspihats', 'raspihats/i2c_hats'],
+    install_requires = ['enum34'],
     classifiers      = ['Development Status :: 5 - Production/Stable',
                            'Operating System :: POSIX :: Linux',
                            'License :: OSI Approved :: MIT License',
