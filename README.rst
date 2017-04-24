@@ -71,6 +71,10 @@ Listing attributes and methods(from v2.0.0)
 Change Log
 ----------
 
+v2.1.0
+~~~~~~
+  - Improved exception handling
+
 v2.0.1
 ~~~~~~
   - Fixed I2C clock stretch timeout setup script
@@ -88,7 +92,7 @@ v2.0.0
 v1.1.1
 ~~~~~~
   - Added support for new boards:
-  
+
     - Di16_
     - Rly10_
     - Di6Rly6_
