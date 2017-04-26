@@ -71,9 +71,13 @@ Listing attributes and methods(from v2.0.0)
 Change Log
 ----------
 
+v2.2.1
+~~~~~~
+  - Added StatusWord class. To get raw int value use board.status.value, to get beautiful string representation use str(board.status).
+
 v2.1.1
 ~~~~~~
-  - String representation of I2CHat object doesn't use an I2C bus transfer any more. 
+  - String representation of I2CHat object doesn't use an I2C bus transfer any more.
   - Improved exception messages
 
 v2.1.0
