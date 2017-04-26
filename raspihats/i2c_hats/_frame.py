@@ -99,9 +99,9 @@ class Frame(object):
         """
         crc = crc16.modbus(data[:-2])
         if crc != (data[-1] << 8) + data[-2]:
-            raise DecodeException('Crc check failed')
+            raise DecodeException('crc check failed')
         if self.id != data[0]:
-            raise DecodeException('Unexpected id')
+            raise DecodeException('unexpected id')
         if self.cmd.value != data[1]:
-            raise DecodeException('Unexpected command')
+            raise DecodeException('unexpected command')
         self.data = data[2:-2]

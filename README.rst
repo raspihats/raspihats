@@ -71,6 +71,11 @@ Listing attributes and methods(from v2.0.0)
 Change Log
 ----------
 
+v2.1.1
+~~~~~~
+  - String representation of I2CHat object doesn't use an I2C bus transfer any more. 
+  - Improved exception messages
+
 v2.1.0
 ~~~~~~
   - Improved exception handling
