@@ -5,10 +5,12 @@ import sys
 import time
 import smbus
 import threading
+from enum import Enum
 from ._frame import Command, Frame, DecodeException
 
 class ResponseException(Exception):
     """Raised when there's a problem with the I2C-HAT response."""
+
 
 class I2CHat(object):
     """Implements basic functionality common to all I2C-HATs.
@@ -200,14 +202,45 @@ class I2CHat(object):
 
     @property
     def status(self):
-        """:obj:`int`: Status word(*)."""
-        return self._get_u32_value_(Command.GET_STATUS_WORD)
+        """:obj:`StatusWord`: Status word(*)."""
+        return StatusWord(self._get_u32_value_(Command.GET_STATUS_WORD))
 
     def reset(self):
         """Sends a reset request to the I2C-HAT."""
         request = self._request_frame_(Command.RESET)
         self._transfer_(request, 0, False)
 
+class StatusWord(object):
+    """Models Status Word
+
+    Args:
+        value (int): Status Word raw integer value
+
+    Attributes:
+        value (int): Status Word raw integer value.
+    """
+
+    class Bits(Enum):
+        """Status Word bit masks"""
+        POR_RESET = 0x01
+        SOFT_RESET = 0x02
+        IWD_RESET = 0x04
+        CWDT_TIMEOUT = 0x08
+
+    def __init__(self, value):
+        self.value = value
+
+    def __str__(self):
+        """Human readable string describing the Status Word."""
+        string = "status:" + hex(self.value)
+        if (self.value & 0x0F) != 0x00:
+            string += " ["
+            for bit in self.Bits:
+                if (self.value & bit.value) != 0x00:
+                    string += str(bit) + ", "
+            string = string[:-2]
+            string += "]"
+        return string
 
 class Functionality(object):
     """I2C-HAT functionality base.
