@@ -46,10 +46,15 @@ class I2CHat(object):
 
         if board_name != None:
             if self.name not in board_name:
-                raise Exception("Unexpected board name '" + self.name + "', expecting '" + board_name + "'")
+                raise Exception("unexpected board name '" + self.name + "', expecting '" + board_name + "'")
 
     def __str__(self):
-        return self.name + " adr: " + hex(self._address)
+        string = self.__class__.__name__
+        base = 'I2CHat'
+        if base not in string:
+            string += base
+        string += "@" + hex(self._address)
+        return string
 
     def _generate_frame_id_(self):
         """Generate new frame Id, increments current frame Id, wraps to 0xFF.
@@ -104,12 +109,10 @@ class I2CHat(object):
 
                 except (IOError, DecodeException) as ex:
                     if try_cnt >= number_of_tries:
-                        message = self.__class__.__name__ + "@" + hex(self.address) + ", "
                         if isinstance(ex, IOError):
-                            message += "No response"
+                            raise ResponseException("no response")
                         else:
-                            message += str(ex)
-                        raise ResponseException(message)
+                            raise ResponseException(str(ex))
                     time.sleep(0.01)
                     try_cnt += 1
 
@@ -130,7 +133,7 @@ class I2CHat(object):
         response = self._transfer_(request, 4)
         data = response.data
         if len(data) != 4:
-            raise ResponseException('Invalid response data length')
+            raise ResponseException('invalid response data length')
         return data[0] + (data[1] << 8) + (data[2] << 16) + (data[3] << 24)
 
     def _set_u32_value_(self, cmd, value):
@@ -150,7 +153,7 @@ class I2CHat(object):
         request = self._request_frame_(cmd, data)
         response = self._transfer_(request, 4)
         if data != response.data:
-            raise ResponseException('Invalid response data')
+            raise ResponseException('invalid response data')
 
     def _request_frame_(self, cmd, data = []):
         """Build request frame, taking care of new frame Id generation.
@@ -223,7 +226,7 @@ class Functionality(object):
 
     def _validate_channel_index(self, index):
         if self._labels == None:
-            raise Exception()
+            raise Exception('no labels defined')
 
         label = None
         if isinstance(index, int):
