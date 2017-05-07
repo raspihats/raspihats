@@ -123,7 +123,7 @@ def get_status(i2c_hat):
         Returns:
             int: The status word
     """
-    return i2c_hat.status
+    return i2c_hat.status.value
 
 def reset(i2c_hat):
     """Resets the I2C-HAT. The exported robotframework keyword is 'Reset'."""
