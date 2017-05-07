@@ -62,6 +62,12 @@ def setup_clk_stretch_timeout(clk_stretch_timeout, baudrate):
 
 def main():
     RASPBERRY_PI = 'raspberry-pi'
+    CHIPSETS = [
+        'BCM2708',
+        'BCM2709',
+        'BCM2835',
+        'BCM2836'
+    ]
     PLATFORM = 'Unknown'
     if platform.system().lower() == 'linux':
         if platform.linux_distribution()[0].lower() == 'debian':
@@ -69,10 +75,15 @@ def main():
                 with open('/proc/cpuinfo') as f:
                     for line in f:
                         line = line.strip()
-                        if line.startswith('Hardware') and ('BCM2708' in line or 'BCM2709' in line):
-                            PLATFORM = RASPBERRY_PI
-                            setup_clk_stretch_timeout(clk_stretch_timeout=0.2, baudrate=100000)
-                            break
+                        if line.startswith('Hardware'):
+                            for chipset in CHIPSETS:
+                                if chipset in line:
+                                    PLATFORM = RASPBERRY_PI
+                                    setup_clk_stretch_timeout(
+                                        clk_stretch_timeout=0.2,
+                                        baudrate=100000
+                                    )
+                                    break
             except:
                 traceback.print_exc()
 
