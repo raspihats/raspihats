@@ -71,6 +71,12 @@ Listing attributes and methods(from v2.0.0)
 Change Log
 ----------
 
+v2.2.2
+~~~~~~
+  - Bug fix in setup script, BCM2835 platform hardware is now recognized.
+  - Bug fix in robotframework interface, status.value is now returned by get_status()
+
+
 v2.2.1
 ~~~~~~
   - Added StatusWord class. To get raw int value use board.status.value, to get beautiful string representation use str(board.status).
