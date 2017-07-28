@@ -146,6 +146,26 @@ class DQ10rly(I2CHat):
         self.cwdt = Cwdt(self)
         self.dq = DigitalOutputs(self, self._labels)
 
+class DQ8rly(I2CHat):
+    """This class exposes all operations supported by the DQ8rly I2C-HAT.
+
+    Args:
+        address (:obj:`int`): I2C bus address, valid range is [0x50, 0x5F]
+
+    Attributes:
+        cwdt (:obj:`raspihats.i2c_hats._base.Cwdt`): provides access to CommunicationWatchDogTimer.
+        dq (:obj:`raspihats.i2c_hats._digital.DigitalOutputs`): provides access to DigitalOutputs.
+    """
+
+    _BASE_ADDRESS = 0x50
+    _BOARD_NAME = 'DQ8rly I2C-HAT'
+    _labels = ['Q0', 'Q1', 'Q2', 'Q3', 'Q4', 'Q5', 'Q6', 'Q7']
+
+    def __init__(self, address):
+        I2CHat.__init__(self, address, self._BASE_ADDRESS, self._BOARD_NAME)
+        self.cwdt = Cwdt(self)
+        self.dq = DigitalOutputs(self, self._labels)
+
 class DI6acDQ6rly(I2CHat):
     """This class exposes all operations supported by the DI6acDQ6rly I2C-HAT.
 

@@ -16,15 +16,14 @@ Set Global Variables
 
 Board Name
     ${name}                     Get Name    ${i2c_hat}
-    Should Be Equal As Strings  ${name}     Di6Rly6 I2C-HAT
+    Should Be Equal As Strings  ${name}     DI6acDQ6rly I2C-HAT
 
 Read Digital Input
-    ${state}    DO Get Channel      ${i2c_hat}      ${5}
-    Should Be Equal As Strings      ${state}        ${False}
+    ${state}    DI Get Channel      ${i2c_hat}      ${0}
     Should Be Equal As Integers     ${state}        ${0}
 
 """
-from ._boards import Di16, Rly10, Di6Rly6, DI16ac, DQ10rly, DQ16oc, DI6acDQ6rly
+from ._boards import Di16, Rly10, Di6Rly6, DI16ac, DQ10rly, DQ8rly, DQ16oc, DI6acDQ6rly
 
 def new_Di16(adr):
     """New instance of class Di16. The exported robotframework keyword is 'New Di16'.
@@ -80,6 +79,17 @@ def new_DQ10rly(adr):
             DQ10rly: A new instance of DQ10rly
     """
     return DQ10rly(adr)
+
+def new_DQ8rly(adr):
+    """New instance of class DQ8rly. The exported robotframework keyword is 'New DQ8rly'.
+
+        Args:
+            adr (int): i2c address
+
+        Returns:
+            DQ8rly: A new instance of DQ8rly
+    """
+    return DQ8rly(adr)
 
 def new_DQ16oc(adr):
     """New instance of class DQ16oc. The exported robotframework keyword is 'New DQ16oc'.
