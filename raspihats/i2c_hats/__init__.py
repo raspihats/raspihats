@@ -6,5 +6,6 @@ from ._boards import (
     DI16ac,
     DQ16oc,
     DQ10rly,
+    DQ8rly,
     DI6acDQ6rly
 )
