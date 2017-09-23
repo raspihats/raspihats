@@ -25,7 +25,7 @@ setup(
     author_email     = 'hardhat@raspihats.com',
     keywords         = 'Raspberry Pi hats add-on boards',
     packages         = ['raspihats', 'raspihats/i2c_hats'],
-    install_requires = ['enum34'],
+    install_requires = ['enum34;python_version<"3.4"'],
     classifiers      = ['Development Status :: 5 - Production/Stable',
                            'Operating System :: POSIX :: Linux',
                            'License :: OSI Approved :: MIT License',
