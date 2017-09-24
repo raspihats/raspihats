@@ -1,7 +1,10 @@
 """
 This module contains the I2C Frame class and related classes.
 """
-from enum import Enum
+try:
+  from enum import Enum
+except ImportError:
+  from enum34 import Enum
 from .. import crc16
 
 class Command(Enum):
