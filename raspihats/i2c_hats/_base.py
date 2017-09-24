@@ -5,7 +5,10 @@ import sys
 import time
 import smbus
 import threading
-from enum import Enum
+try:
+  from enum import Enum
+except ImportError:
+  from enum34 import Enum
 from ._frame import Command, Frame, DecodeException
 
 class ResponseException(Exception):
