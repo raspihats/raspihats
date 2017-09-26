@@ -51,6 +51,8 @@ def update_rc_local(dest_path, set_exec_name, clkt_tout):
 
 def setup_clk_stretch_timeout(clk_stretch_timeout, baudrate):
     dest_path = "/usr/local/bin/"
+    if not os.access(dest_path, os.W_OK):
+        raise Exception("Run this script using 'sudo' to set proper value for I2C Clock Stretch Timeout, for more info checkout http://raspihats.com/i2c-clock-stretching-timeout-on-the-raspberry-pi/")
     set_exec_name = "i2c1_set_clkt_tout"
     get_exec_name = "i2c1_get_clkt_tout"
     clkt_tout = int(float(clk_stretch_timeout) * float(baudrate))

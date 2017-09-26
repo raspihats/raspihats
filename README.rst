@@ -30,7 +30,7 @@ Listing attributes and methods(from v2.0.0)
     board = DI6acDQ6rly(0x60)     # 0x60 is the I2C bus address
 
     board.name                    # get board name, in this case 'DI6acDQ6rly'
-    board.status                  # get status word
+    board.status.value            # get status word
     board.reset()                 # reset board
 
     # cwdt - Communication WatchDog Timer
@@ -70,6 +70,11 @@ Listing attributes and methods(from v2.0.0)
 
 Change Log
 ----------
+
+v2.2.3
+~~~~~~
+  - enum34 is loaded for python<3.4
+  - setup script warning if it's not run with sudo(used to setup I2C ClockStretchTimeout) 
 
 v2.2.2
 ~~~~~~

@@ -16,7 +16,7 @@ class ClockStretchTimeoutInstall(install):
 
 setup(
     name             = 'raspihats',
-    version          = '2.2.2',
+    version          = '2.2.3',
     description      = 'package for controlling raspihats.com boards',
     long_description = open('README.rst').read(),
     license          = open('LICENSE').read(),

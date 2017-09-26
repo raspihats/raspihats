@@ -29,15 +29,16 @@ class I2CHat(object):
     (*) - attribute value read directly from I2C-HAT
 
     """
+    I2C_PORT = 1 # 1 is default port for Raspberry Pi
 
     _i2c_bus_lock = threading.Lock()
     _i2c_bus = None
-    try:
-        _i2c_bus = smbus.SMBus(1)     # default for Raspberry Pi
-    except:
-        print("I2C port not found!")
 
     def __init__(self, address, base_address=None, board_name=None):
+
+        if I2CHat._i2c_bus is None:
+            I2CHat._i2c_bus = smbus.SMBus(I2CHat.I2C_PORT)
+
         self._address = address
         self._frame_id = 0x1F - 1
         self._transfer_time = None
@@ -214,17 +215,17 @@ class I2CHat(object):
         self._transfer_(request, 0, False)
 
 class StatusWord(object):
-    """Models Status Word
+    """Models StatusWord
 
     Args:
-        value (int): Status Word raw integer value
+        value (int): StatusWord raw integer value
 
     Attributes:
-        value (int): Status Word raw integer value.
+        value (int): StatusWord integer value.
     """
 
     class Bits(Enum):
-        """Status Word bit masks"""
+        """StatusWord bit masks"""
         POR_RESET = 0x01
         SOFT_RESET = 0x02
         IWD_RESET = 0x04
@@ -233,16 +234,17 @@ class StatusWord(object):
     def __init__(self, value):
         self.value = value
 
+    @property
+    def bits(self):
+        """:obj:`dict`: StatusWord bit values dictinary."""
+        d = dict()
+        for bit in self.Bits:
+            d[str(bit).replace("Bits.","")] = (self.value & bit.value) != 0x0
+        return d
+
     def __str__(self):
-        """Human readable string describing the Status Word."""
-        string = "status:" + hex(self.value)
-        if (self.value & 0x0F) != 0x00:
-            string += " ["
-            for bit in self.Bits:
-                if (self.value & bit.value) != 0x00:
-                    string += str(bit) + ", "
-            string = string[:-2]
-            string += "]"
+        """Human readable string describing the StatusWord."""
+        string = "value: " + hex(self.value) + ", bits: " + str(self.bits)
         return string
 
 class Functionality(object):
