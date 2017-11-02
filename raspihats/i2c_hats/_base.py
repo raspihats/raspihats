@@ -40,7 +40,7 @@ class I2CHat(object):
             I2CHat._i2c_bus = smbus.SMBus(I2CHat.I2C_PORT)
 
         self._address = address
-        self._frame_id = 0x1F - 1
+        self._frame_id = 0
         self._transfer_time = None
 
         if base_address == None:
@@ -63,17 +63,17 @@ class I2CHat(object):
         return string
 
     def _generate_frame_id_(self):
-        """Generate new frame Id, increments current frame Id, wraps to 0xFF.
+        """Generate new frame Id, increments current frame Id, wraps to 0x7F beacuse of Raspberry Pi I2C bug which affects MSb
 
         Returns:
             int: The new frame Id
 
         """
         self._frame_id += 1
-        self._frame_id &= 0xFF
+        self._frame_id &= 0x7F
         return self._frame_id
 
-    def _transfer_(self, request_frame, response_data_size, response_expected=True, number_of_tries=5):
+    def _transfer_(self, request_frame, response_data_size, response_expected=True, number_of_tries=1):
         """Tries a number of times to send a request frame and to get a response frame over I2C bus.
 
         Args:
