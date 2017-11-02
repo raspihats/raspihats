@@ -101,10 +101,14 @@ class Frame(object):
 
         """
         crc = crc16.modbus(data[:-2])
-        if crc != (data[-1] << 8) + data[-2]:
-            raise DecodeException('crc check failed')
+        crc_in = (data[-1] << 8) + data[-2]
+        if crc != crc_in:
+            #print('crc check failed, ' + hex(crc) + '!=' + hex(crc_in) + str([hex(x) for x in data]))
+            raise DecodeException('crc check failed, ' + hex(crc) + '!=' + hex(crc_in) + ' data:' + str([hex(x) for x in data]))
         if self.id != data[0]:
+            #print('unexpected id')
             raise DecodeException('unexpected id')
         if self.cmd.value != data[1]:
+            #print('unexpected command')
             raise DecodeException('unexpected command')
         self.data = data[2:-2]
