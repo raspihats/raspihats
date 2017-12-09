@@ -73,7 +73,7 @@ class I2CHat(object):
         self._frame_id &= 0x7F
         return self._frame_id
 
-    def _transfer_(self, request_frame, response_data_size, response_expected=True, number_of_tries=1):
+    def _transfer_(self, request_frame, response_data_size, response_expected=True, number_of_tries=5):
         """Tries a number of times to send a request frame and to get a response frame over I2C bus.
 
         Args:
