@@ -90,7 +90,7 @@ def main():
                 traceback.print_exc()
 
     LEGAL_PLATFORMS = RASPBERRY_PI
-    assert PLATFORM in LEGAL_PLATFORMS, "Don't understand platform"
+    assert PLATFORM in LEGAL_PLATFORMS, "Don't understand platform:" + PLATFORM
 
 if __name__ == '__main__':
   main()
