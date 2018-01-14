@@ -230,6 +230,7 @@ class StatusWord(object):
         SOFT_RESET = 0x02
         IWD_RESET = 0x04
         CWDT_TIMEOUT = 0x08
+        DI_IRQ_CAPTURE_QUEUE_FULL = 0x10
 
     def __init__(self, value):
         self.value = value
@@ -313,3 +314,43 @@ class Cwdt(Functionality):
         if value < 0:
             raise ValueError("period should be greather than zero to enable the CommunicationWatchdogTimer on the I2C-HAT board")
         self._i2c_hat._set_u32_value_(Command.CWDT_SET_PERIOD, int(value * 1000))
+
+
+class Irq(Functionality):
+    """Provides attributes and methods for operating the I2C-HAT IRQ module.
+
+    Args:
+        i2c_hat (:obj:`raspihats.i2c_hats._base.I2CHat`): I2CHat instance
+
+    (*) - attribute value read directly from I2C-HAT
+
+    """
+
+    class RegName(Enum):
+        """IRQ registers"""
+        DI_FALLING_EDGE_CONTROL     = 0x20
+        DI_RISING_EDGE_CONTROL      = 0x21
+        DI_CAPTURE                  = 0x22
+
+    def __init__(self, i2c_hat):
+        Functionality.__init__(self, i2c_hat)
+
+    def get_reg(self, reg_type):
+        """:obj:`int`: The value of IRQ control reg, 1 bit represents 1 channel."""
+        request = self._i2c_hat._request_frame_(Command.IRQ_GET_REG, [reg_type])
+        response = self._i2c_hat._transfer_(request, 5)
+        data = response.data
+        if (len(data) != 1 + 4) or (data[0] != reg_type):
+            raise ResponseException('Invalid data')
+        return data[1] + (data[2] << 8) + (data[3] << 16) + (data[4] << 24)
+
+    def set_reg(self, reg_type, value):
+        """:obj:`int`: The value of IRQ control reg, 1 bit represents 1 channel."""
+        # self._validate_value(value)
+        data = [reg_type, value & 0xFF, (value >> 8) & 0xFF, (value >> 16) & 0xFF, (value >> 24) & 0xFF]
+        request = self._i2c_hat._request_frame_(Command.IRQ_SET_REG, data)
+        response = self._i2c_hat._transfer_(request, 5)
+        data = response.data
+        if (len(data) != 1 + 4) or (data[0] != reg_type):
+            raise ResponseException('Invalid data')
+        return data[1] + (data[2] << 8) + (data[3] << 16) + (data[4] << 24)

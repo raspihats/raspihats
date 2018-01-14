@@ -15,9 +15,90 @@ Typical usage often looks like this:
     dq10rly = DQ10rly(0x50) # 0x50 is the I2C bus address
 
     while True:
-        state = di16ac.di.channels[0]          # get digital input channel 0
+        state = di16ac.di.channels[0]           # get digital input channel 0
         dq10rly.dq.channels[0] = state          # set digital output channel 0
         dq10rly.dq.channels[1] = not state      # set digital output channel 1
+
+IRQ feature(from v2.3.0)
+------------------------
+
+    Starting from hardware revision 2.0, DI16ac and DI6acDQ6rly boards can trigger an IRQ line that's connected to GPIO21 of the Raspberry Pi.
+
+.. code-block:: python
+
+    try:
+        import Queue as queue
+    except ImportError:
+        import queue
+    from time import sleep
+    import RPi.GPIO as GPIO
+    from raspihats.i2c_hats import DI16ac, DI6acDQ6rly
+
+    IRQ_PIN = 21
+    GPIO.setmode(GPIO.BCM)
+
+    # IRQ pin setup as input with pull-up enabled
+    GPIO.setup(IRQ_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+
+    # this queue is use to safely exchange information between threads
+    event_queue = queue.Queue(maxsize = 20)
+
+    def isr(pin):
+        event_queue.put(pin)
+
+    GPIO.add_event_detect(IRQ_PIN, GPIO.FALLING, callback=isr)
+
+    # b = DI16ac(0x40)        # 0x40 is the I2C bus address
+    b = DI6acDQ6rly(0x60)   # 0x60 is the I2C bus address
+
+    print(str(b.name) + ' ' + str(b.fw_version))
+    print('Use Ctrl+C to stop program.')
+
+    # enable raising edge IRQs for Digital Input channels 0 and 2
+    b.di.irq_reg.rising_edge_control = 0x05
+
+    # enable falling edge IRQs for Digital Input channels 1 and 2
+    b.di.irq_reg.falling_edge_control = 0x06
+
+    # dump DigitalInputs IRQ CaptureQueue contents and release IRQ line by
+    # writing 0 to DigitalInputs IRQ Capture Register
+    b.di.irq_reg.capture = 0
+
+    while True:
+        try:
+            # wait until there is something in the queue, timeout is here because a
+            # queue.get without a timeout can't be interrupted with a KeyboardInterrupt
+            pin = event_queue.get(block=True, timeout=0.2)
+            if pin == IRQ_PIN:
+                # read the DigitalInputs IRQ Capture Register(to read the values
+                # stored in the DigitalInputs IRQ CaptureQueue) until the
+                # returned value is 0, this means DigitalInputs IRQ CaptureQueue
+                # is empty and the IRQ line is released
+                while True:
+                    capture = b.di.irq_reg.capture
+                    if capture == 0:
+                        break
+                    status = capture & 0xFFFF
+                    states = (capture >> 16) & 0xFFFF
+                    for channel in range(0, 16):
+                        mask = 0x01 << channel
+                        if (status & mask) > 0:
+                            print('IRQ detected on channel: %d, state: %d' %(channel, (states & mask) >> channel))
+        except queue.Empty:
+            pass
+
+        except KeyboardInterrupt:
+            # disable raising edge IRQs for Digital Input channels
+            b.di.irq_reg.raising_edge_control = 0
+
+            # disable falling edge IRQs for Digital Input channels
+            b.di.irq_reg.falling_edge_control = 0
+
+            GPIO.remove_event_detect(IRQ_PIN)
+            GPIO.cleanup()
+
+            break
+
 
 Listing attributes and methods(from v2.0.0)
 -------------------------------------------
@@ -71,10 +152,14 @@ Listing attributes and methods(from v2.0.0)
 Change Log
 ----------
 
+v2.3.0
+~~~~~~
+  - Added IRQ support
+
 v2.2.3
 ~~~~~~
   - enum34 is loaded for python<3.4
-  - setup script warning if it's not run with sudo(used to setup I2C ClockStretchTimeout) 
+  - Setup script warning if it's not run with sudo(used to setup I2C ClockStretchTimeout)
 
 v2.2.2
 ~~~~~~

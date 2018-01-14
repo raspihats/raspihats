@@ -11,32 +11,33 @@ class Command(Enum):
     """I2C-HAT commands"""
 
     # common board commands
-    GET_BOARD_NAME = 0x10
-    GET_FIRMWARE_VERSION = 0x11
-    GET_STATUS_WORD = 0x12
-    RESET = 0x13
+    GET_BOARD_NAME              = 0x10
+    GET_FIRMWARE_VERSION        = 0x11
+    GET_STATUS_WORD             = 0x12
+    RESET                       = 0x13
 
     # Communication WatchDog commands
-    CWDT_SET_PERIOD = 0x14
-    CWDT_GET_PERIOD = 0x15
-    CWDT_SET_STATE = 0x16
+    CWDT_SET_PERIOD             = 0x14
+    CWDT_GET_PERIOD             = 0x15
+    IRQ_GET_REG                 = 0x16
+    IRQ_SET_REG                 = 0x17
 
     # Digital Inputs commands
-    DI_GET_ALL_CHANNEL_STATES = 0x20
-    DI_GET_CHANNEL_STATE = 0x21
-    DI_GET_COUNTER = 0x22
-    DI_RESET_COUNTER = 0x23
-    DI_RESET_ALL_COUNTERS = 0x24
+    DI_GET_ALL_CHANNEL_STATES   = 0x20
+    DI_GET_CHANNEL_STATE        = 0x21
+    DI_GET_COUNTER              = 0x22
+    DI_RESET_COUNTER            = 0x23
+    DI_RESET_ALL_COUNTERS       = 0x24
 
     # Digital Outputs commands
-    DQ_SET_POWER_ON_VALUE = 0x30
-    DQ_GET_POWER_ON_VALUE = 0x31
-    DQ_SET_SAFETY_VALUE = 0x32
-    DQ_GET_SAFETY_VALUE = 0x33
-    DQ_SET_ALL_CHANNEL_STATES = 0x34
-    DQ_GET_ALL_CHANNEL_STATES = 0x35
-    DQ_SET_CHANNEL_STATE = 0x36
-    DQ_GET_CHANNEL_STATE = 0x37
+    DQ_SET_POWER_ON_VALUE       = 0x30
+    DQ_GET_POWER_ON_VALUE       = 0x31
+    DQ_SET_SAFETY_VALUE         = 0x32
+    DQ_GET_SAFETY_VALUE         = 0x33
+    DQ_SET_ALL_CHANNEL_STATES   = 0x34
+    DQ_GET_ALL_CHANNEL_STATES   = 0x35
+    DQ_SET_CHANNEL_STATE        = 0x36
+    DQ_GET_CHANNEL_STATE        = 0x37
 
 class DecodeException(Exception):
     """Raised when I2C Frame decoding fails."""

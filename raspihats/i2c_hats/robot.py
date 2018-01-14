@@ -25,6 +25,37 @@ Read Digital Input
 """
 from ._boards import Di16, Rly10, Di6Rly6, DI16ac, DQ10rly, DQ8rly, DQ16oc, DI6acDQ6rly
 
+irq_pin = None
+
+def init_irq_pin(pin=21):
+    """Initializes the IRQ pin as input with Pull UP enabled. The exported robotframework keyword is 'Init Irq Pin'.
+
+        Args:
+            pin (I2CHat): IRQ Pin
+    """
+    import RPi.GPIO as GPIO
+    global irq_pin
+
+    irq_pin = pin
+    GPIO.setmode(GPIO.BCM)
+    GPIO.setup(irq_pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+
+def get_irq_pin_state():
+    """Gets the IRQ pin state. The exported robotframework keyword is 'Get Irq Pin State'.
+
+        Returns:
+            bool: IRQ pin state
+    """
+    import RPi.GPIO as GPIO
+    global irq_pin
+
+    return GPIO.input(irq_pin)
+
+def exit():
+    """Clean Up. The exported robotframework keyword is 'Exit'."""
+    import RPi.GPIO as GPIO
+    GPIO.cleanup()
+
 def new_Di16(adr):
     """New instance of class Di16. The exported robotframework keyword is 'New Di16'.
 
@@ -123,6 +154,17 @@ def get_name(i2c_hat):
             string: The name of the board
     """
     return i2c_hat.name
+
+def get_firmware_version(i2c_hat):
+    """Gets the I2C-HAT name. The exported robotframework keyword is 'Get Firmware Version'.
+
+        Args:
+            i2c_hat (I2CHat): board
+
+        Returns:
+            string: The firmware version
+    """
+    return i2c_hat.fw_version
 
 def get_status(i2c_hat):
     """Gets the I2C-HAT status word. The exported robotframework keyword is 'Get Status'.
@@ -330,3 +372,21 @@ def di_reset_all_counters(i2c_hat):
             i2c_hat (I2CHat): board
     """
     i2c_hat.di.reset_counters()
+
+def di_get_irq_reg_rising_edge_control(i2c_hat):
+    return i2c_hat.di.irq_reg.rising_edge_control
+
+def di_set_irq_reg_rising_edge_control(i2c_hat, value):
+    i2c_hat.di.irq_reg.rising_edge_control = value
+
+def di_get_irq_reg_falling_edge_control(i2c_hat):
+    return i2c_hat.di.irq_reg.falling_edge_control
+
+def di_set_irq_reg_falling_edge_control(i2c_hat, value):
+    i2c_hat.di.irq_reg.falling_edge_control = value
+
+def di_get_irq_reg_capture(i2c_hat):
+    return i2c_hat.di.irq_reg.capture
+
+def di_set_irq_reg_capture(i2c_hat, value):
+    i2c_hat.di.irq_reg.capture = value
