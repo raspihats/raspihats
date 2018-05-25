@@ -40,7 +40,7 @@ IRQ feature(from v2.3.0)
     # IRQ pin setup as input with pull-up enabled
     GPIO.setup(IRQ_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
-    # this queue is use to safely exchange information between threads
+    # this queue is used to safely exchange information between threads
     event_queue = queue.Queue(maxsize = 20)
 
     def isr(pin):
@@ -54,7 +54,7 @@ IRQ feature(from v2.3.0)
     print(str(b.name) + ' ' + str(b.fw_version))
     print('Use Ctrl+C to stop program.')
 
-    # enable raising edge IRQs for Digital Input channels 0 and 2
+    # enable rising edge IRQs for Digital Input channels 0 and 2
     b.di.irq_reg.rising_edge_control = 0x05
 
     # enable falling edge IRQs for Digital Input channels 1 and 2
@@ -88,8 +88,8 @@ IRQ feature(from v2.3.0)
             pass
 
         except KeyboardInterrupt:
-            # disable raising edge IRQs for Digital Input channels
-            b.di.irq_reg.raising_edge_control = 0
+            # disable rising edge IRQs for Digital Input channels
+            b.di.irq_reg.rising_edge_control = 0
 
             # disable falling edge IRQs for Digital Input channels
             b.di.irq_reg.falling_edge_control = 0
@@ -123,10 +123,10 @@ Listing attributes and methods(from v2.0.0)
     board.di.value                # get all digital input channel states, bit 0 represents channel 0 state and so on ..
     board.di.channels[0]          # get digital input channel 0 state, access using channel index
     board.di.channels['I0']       # get digital input channel 0 state, access using channel label
-    board.di.r_counters[0]        # get digital input channel 0 raising edge counter
-    board.di.r_counters['I0']     # get digital input channel 0 raising edge counter
-    board.di.r_counters[0] = 0    # reset digital input channel 0 raising edge counter
-    board.di.r_counters['I0'] = 0 # reset digital input channel 0 raising edge counter
+    board.di.r_counters[0]        # get digital input channel 0 rising edge counter
+    board.di.r_counters['I0']     # get digital input channel 0 rising edge counter
+    board.di.r_counters[0] = 0    # reset digital input channel 0 rising edge counter
+    board.di.r_counters['I0'] = 0 # reset digital input channel 0 rising edge counter
     board.di.f_counters[0]        # get digital input channel 0 falling edge counter
     board.di.f_counters['I0']     # get digital input channel 0 falling edge counter
     board.di.f_counters[0] = 0    # reset digital input channel 0 falling edge counter
