@@ -23,7 +23,7 @@ Read Digital Input
     Should Be Equal As Integers     ${state}        ${0}
 
 """
-from ._boards import Di16, Rly10, Di6Rly6, DI16ac, DQ10rly, DQ8rly, DQ16oc, DI6acDQ6rly
+from . import Di16, Rly10, Di6Rly6, DI16ac, DQ10rly, DQ8rly, DQ16oc, DI6acDQ6rly
 
 irq_pin = None
 

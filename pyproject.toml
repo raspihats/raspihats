@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "raspihats"
+version = "2.4.0"
+authors = [
+  { name="Florin COSTA", email="hardhat@raspihats.com" },
+]
+description = "package for controlling raspihats.com boards"
+readme = "README.md"
+license = { file="LICENSE" }
+dependencies = [
+    'smbus2',
+    'enum34; python_version < "3.4"'
+]
+classifiers = [
+    'Programming Language :: Python :: 2.7',
+    'Programming Language :: Python :: 3',
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    'Development Status :: 5 - Production/Stable',
+    'Intended Audience :: Developers',
+    'Intended Audience :: Education',
+    'Topic :: Software Development',
+    'Topic :: Home Automation',
+    'Topic :: System :: Hardware'
+]
+
+[project.urls]
+"Homepage" = "https://github.com/raspihats/raspihats"
+"Bug Tracker" = "https://github.com/raspihats/raspihats/issues"

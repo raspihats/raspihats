@@ -1,3 +1,0 @@
-include LICENSE README.rst
-recursive-include clk_stretch *
-recursive-include raspihats/i2c_hats *.py

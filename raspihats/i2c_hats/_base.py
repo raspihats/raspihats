@@ -3,7 +3,7 @@ This module contains the I2CHat base class.
 """
 import sys
 import time
-import smbus
+import smbus2
 import threading
 try:
   from enum import Enum
@@ -37,7 +37,7 @@ class I2CHat(object):
     def __init__(self, address, base_address=None, board_name=None):
 
         if I2CHat._i2c_bus is None:
-            I2CHat._i2c_bus = smbus.SMBus(I2CHat.I2C_PORT)
+            I2CHat._i2c_bus = smbus2.SMBus(I2CHat.I2C_PORT)
 
         self._address = address
         self._frame_id = 0
