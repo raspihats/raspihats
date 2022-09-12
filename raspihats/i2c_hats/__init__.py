@@ -205,7 +205,7 @@ class DI6acDQ6ssr(I2CHat):
 
     """
 
-    _BASE_ADDRESS = 0x70
+    _BASE_ADDRESS = 0x60
     _BOARD_NAME = 'DI6acDQ6ssr I2C-HAT'
     _di_labels = ['I0', 'I1', 'I2', 'I3', 'I4', 'I5']
     _dq_labels = ['Q0', 'Q1', 'Q2', 'Q3', 'Q4', 'Q5']
@@ -231,7 +231,7 @@ class DI6dwDQ6ssr(I2CHat):
 
     """
 
-    _BASE_ADDRESS = 0x80
+    _BASE_ADDRESS = 0x60
     _BOARD_NAME = 'DI6dwDQ6ssr I2C-HAT'
     _di_labels = ['I0', 'I1', 'I2', 'I3', 'I4', 'I5']
     _dq_labels = ['Q0', 'Q1', 'Q2', 'Q3', 'Q4', 'Q5']

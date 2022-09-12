@@ -23,7 +23,7 @@ Read Digital Input
     Should Be Equal As Integers     ${state}        ${0}
 
 """
-from . import Di16, Rly10, Di6Rly6, DI16ac, DQ10rly, DQ8rly, DQ16oc, DI6acDQ6rly
+from . import Di16, Rly10, Di6Rly6, DI16ac, DQ10rly, DQ8rly, DQ16oc, DI6acDQ6rly, DI6acDQ6ssr, DI6dwDQ6ssr
 
 irq_pin = None
 
@@ -143,6 +143,28 @@ def new_DI6acDQ6rly(adr):
             DI6acDQ6rly: A new instance of DI6acDQ6rly
     """
     return DI6acDQ6rly(adr)
+
+def new_DI6acDQ6ssr(adr):
+    """New instance of class DI6acDQ6ssr. The exported robotframework keyword is 'New DI6acDQ6ssr'.
+
+        Args:
+            adr (int): i2c address
+
+        Returns:
+            DI6acDQ6ssr: A new instance of DI6acDQ6ssr
+    """
+    return DI6acDQ6ssr(adr)
+
+def new_DI6dwDQ6ssr(adr):
+    """New instance of class DI6dwDQ6ssr. The exported robotframework keyword is 'New DI6dwDQ6ssr'.
+
+        Args:
+            adr (int): i2c address
+
+        Returns:
+            DI6dwDQ6ssr: A new instance of DI6dwDQ6ssr
+    """
+    return DI6dwDQ6ssr(adr)
 
 def get_name(i2c_hat):
     """Gets the I2C-HAT name. The exported robotframework keyword is 'Get Name'.
