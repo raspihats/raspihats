@@ -23,7 +23,7 @@ Read Digital Input
     Should Be Equal As Integers     ${state}        ${0}
 
 """
-from . import Di16, Rly10, Di6Rly6, DI16ac, DQ10rly, DQ8rly, DQ16oc, DI6acDQ6rly, DI6acDQ6ssr, DI6dwDQ6ssr
+from . import Di16, Rly10, Di6Rly6, DI16ac, DQ10rly, DQ8rly, DQ5rly, DQ16oc, DI6acDQ6rly, DI6acDQ6ssr, DI6dwDQ6ssr
 
 irq_pin = None
 
@@ -121,6 +121,17 @@ def new_DQ8rly(adr):
             DQ8rly: A new instance of DQ8rly
     """
     return DQ8rly(adr)
+
+def new_DQ5rly(adr):
+    """New instance of class DQ8rly. The exported robotframework keyword is 'New DQ5rly'.
+
+        Args:
+            adr (int): i2c address
+
+        Returns:
+            DQ5rly: A new instance of DQ5rly
+    """
+    return DQ5rly(adr)
 
 def new_DQ16oc(adr):
     """New instance of class DQ16oc. The exported robotframework keyword is 'New DQ16oc'.

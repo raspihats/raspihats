@@ -145,6 +145,9 @@ board.dq.labels               # get digital output labels
 
 ## Change Log
 
+### v2.5.0
+  - Added support for new board, DQ5rly I2C-HAT
+
 ### v2.4.0
   - Switched to smbus2 to communicate over I2C
   - Removed I2C clock stretching timeout script, RaspberryPi OS sets by default an acceptable value for the I2C clock stretching timeout.
