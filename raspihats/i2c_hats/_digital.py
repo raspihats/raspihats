@@ -97,15 +97,56 @@ class DigitalInputs(Functionality):
             def __len__(self):
                 return len(outer_instance.labels)
 
+        class Filters(object):
+            """List-like access to per-channel filter constants (CiA 401
+            0x6003), in milliseconds, persistent. Requires firmware with CiA
+            alignment support."""
+            def __getitem__(self, index):
+                index = outer_instance._validate_channel_index(index)
+                request = outer_instance._i2c_hat._request_frame_(Command.DI_GET_CHANNEL_FILTER, [index])
+                response = outer_instance._i2c_hat._transfer_(request, 5)
+                data = response.data
+                if len(data) != 5 or data[0] != index:
+                    raise ResponseException('unexpected format')
+                return data[1] + (data[2] << 8) + (data[3] << 16) + (data[4] << 24)
+
+            def __setitem__(self, index, ms):
+                index = outer_instance._validate_channel_index(index)
+                ms = int(ms)
+                if not (1 <= ms <= 65535):
+                    raise ValueError("filter time must be 1..65535 ms")
+                data = [index, ms & 0xFF, (ms >> 8) & 0xFF, (ms >> 16) & 0xFF, (ms >> 24) & 0xFF]
+                request = outer_instance._i2c_hat._request_frame_(Command.DI_SET_CHANNEL_FILTER, data)
+                response = outer_instance._i2c_hat._transfer_(request, 5)
+                if data != response.data:
+                    raise ResponseException('unexpected format')
+
+            def __len__(self):
+                return len(outer_instance.labels)
+
         self.channels = Channels()
         self.r_counters = Counters(1)
         self.f_counters = Counters(0)
         self.irq_reg = IRQReg()
+        self.filters = Filters()
 
     @property
     def value(self):
         """:obj:`int`: The value of all the digital inputs, 1 bit represents 1 channel."""
         return self._i2c_hat._get_u32_value_(Command.DI_GET_ALL_CHANNEL_STATES)
+
+    @property
+    def polarity(self):
+        """:obj:`int`: Input polarity (CiA 401 0x6002), 1 bit per channel:
+        1 = logical state is the inverted pin. Applied before debouncing, so
+        states, counters and IRQ edges all follow the logical signal.
+        Persistent. Requires firmware with CiA alignment support."""
+        return self._i2c_hat._get_u32_value_(Command.DI_GET_POLARITY)
+
+    @polarity.setter
+    def polarity(self, value):
+        self._validate_value(value)
+        self._i2c_hat._set_u32_value_(Command.DI_SET_POLARITY, value)
 
     def reset_counters(self):
         """Resets all digital input channel counters of all types(falling and rising edge).
@@ -193,3 +234,33 @@ class DigitalOutputs(Functionality):
     def safety_value(self, value):
         self._validate_value(value)
         self._i2c_hat._set_u32_value_(Command.DQ_SET_SAFETY_VALUE, value)
+
+    @property
+    def polarity(self):
+        """:obj:`int`: Output polarity (CiA 401 0x6202), 1 bit per channel:
+        1 = invert between logical value and pin. All values on the wire stay
+        logical; firmware applies the inversion at the pin for every source
+        (writes, power-on value, safety value). Persistent. Requires firmware
+        with CiA alignment support. Note: writing this flips the affected
+        physical pins immediately (logical state is preserved) - commission,
+        don't toggle at runtime."""
+        return self._i2c_hat._get_u32_value_(Command.DQ_GET_POLARITY)
+
+    @polarity.setter
+    def polarity(self, value):
+        self._validate_value(value)
+        self._i2c_hat._set_u32_value_(Command.DQ_SET_POLARITY, value)
+
+    @property
+    def safety_mask(self):
+        """:obj:`int`: Safety mask (CiA 401 0x6206), 1 bit per channel:
+        1 = the channel takes the safety value on a Cwdt Timeout,
+        0 = the channel holds its last state. Default: all channels masked
+        (the pre-mask firmware behavior). Persistent. Requires firmware with
+        CiA alignment support."""
+        return self._i2c_hat._get_u32_value_(Command.DQ_GET_SAFETY_MASK)
+
+    @safety_mask.setter
+    def safety_mask(self, value):
+        self._validate_value(value)
+        self._i2c_hat._set_u32_value_(Command.DQ_SET_SAFETY_MASK, value)

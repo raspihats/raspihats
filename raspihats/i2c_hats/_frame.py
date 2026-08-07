@@ -21,6 +21,8 @@ class Command(Enum):
     CWDT_GET_PERIOD             = 0x15
     IRQ_GET_REG                 = 0x16
     IRQ_SET_REG                 = 0x17
+    # CiA 301 0x1011: guarded by the 'load' signature payload
+    RESTORE_FACTORY_DEFAULTS    = 0x18
 
     # Digital Inputs commands
     DI_GET_ALL_CHANNEL_STATES   = 0x20
@@ -28,6 +30,11 @@ class Command(Enum):
     DI_GET_COUNTER              = 0x22
     DI_RESET_COUNTER            = 0x23
     DI_RESET_ALL_COUNTERS       = 0x24
+    # CiA 401 alignment: 0x6003 filter constant, 0x6002 change polarity
+    DI_SET_CHANNEL_FILTER       = 0x2A
+    DI_GET_CHANNEL_FILTER       = 0x2B
+    DI_SET_POLARITY             = 0x2C
+    DI_GET_POLARITY             = 0x2D
 
     # Digital Outputs commands
     DQ_SET_POWER_ON_VALUE       = 0x30
@@ -38,6 +45,11 @@ class Command(Enum):
     DQ_GET_ALL_CHANNEL_STATES   = 0x35
     DQ_SET_CHANNEL_STATE        = 0x36
     DQ_GET_CHANNEL_STATE        = 0x37
+    # CiA 401 alignment: 0x6202 change polarity, 0x6206 error mode (safety mask)
+    DQ_SET_POLARITY             = 0x38
+    DQ_GET_POLARITY             = 0x39
+    DQ_SET_SAFETY_MASK          = 0x3A
+    DQ_GET_SAFETY_MASK          = 0x3B
 
 class DecodeException(Exception):
     """Raised when I2C Frame decoding fails."""

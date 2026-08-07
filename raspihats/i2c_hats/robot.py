@@ -376,6 +376,105 @@ def do_set_channel(i2c_hat, index, value):
     i2c_hat.dq.channels[index] = value
 
 
+def do_get_polarity(i2c_hat):
+    """Gets the I2C-HAT digital outputs polarity (CiA 401 0x6202). The exported robotframework keyword is 'DO Get Polarity'.
+
+    Args:
+        i2c_hat (I2CHat): board
+
+    Returns:
+        int: The polarity mask, 1 bit per channel, 1 = inverted at the pin
+    """
+    return i2c_hat.dq.polarity
+
+
+def do_set_polarity(i2c_hat, value):
+    """Sets the I2C-HAT digital outputs polarity (CiA 401 0x6202), persistent. The exported robotframework keyword is 'DO Set Polarity'.
+
+    Args:
+        i2c_hat (I2CHat): board
+        value (int): polarity mask, 1 bit per channel, 1 = invert at the pin
+    """
+    i2c_hat.dq.polarity = value
+
+
+def do_get_safety_mask(i2c_hat):
+    """Gets the I2C-HAT digital outputs safety mask (CiA 401 0x6206). The exported robotframework keyword is 'DO Get Safety Mask'.
+
+    Args:
+        i2c_hat (I2CHat): board
+
+    Returns:
+        int: The safety mask, 1 bit per channel, 1 = takes the safety value on a CWDT trip
+    """
+    return i2c_hat.dq.safety_mask
+
+
+def do_set_safety_mask(i2c_hat, value):
+    """Sets the I2C-HAT digital outputs safety mask (CiA 401 0x6206), persistent. The exported robotframework keyword is 'DO Set Safety Mask'.
+
+    Args:
+        i2c_hat (I2CHat): board
+        value (int): safety mask, 1 bit per channel, 0 = hold last state on a CWDT trip
+    """
+    i2c_hat.dq.safety_mask = value
+
+
+def di_get_polarity(i2c_hat):
+    """Gets the I2C-HAT digital inputs polarity (CiA 401 0x6002). The exported robotframework keyword is 'DI Get Polarity'.
+
+    Args:
+        i2c_hat (I2CHat): board
+
+    Returns:
+        int: The polarity mask, 1 bit per channel, 1 = logical is inverted pin
+    """
+    return i2c_hat.di.polarity
+
+
+def di_set_polarity(i2c_hat, value):
+    """Sets the I2C-HAT digital inputs polarity (CiA 401 0x6002), persistent. The exported robotframework keyword is 'DI Set Polarity'.
+
+    Args:
+        i2c_hat (I2CHat): board
+        value (int): polarity mask, 1 bit per channel
+    """
+    i2c_hat.di.polarity = value
+
+
+def di_get_channel_filter(i2c_hat, index):
+    """Gets a digital input channel's filter constant in ms (CiA 401 0x6003). The exported robotframework keyword is 'DI Get Channel Filter'.
+
+    Args:
+        i2c_hat (I2CHat): board
+        index (int): channel index
+
+    Returns:
+        int: filter time in milliseconds
+    """
+    return i2c_hat.di.filters[index]
+
+
+def di_set_channel_filter(i2c_hat, index, ms):
+    """Sets a digital input channel's filter constant in ms (CiA 401 0x6003), persistent. The exported robotframework keyword is 'DI Set Channel Filter'.
+
+    Args:
+        i2c_hat (I2CHat): board
+        index (int): channel index
+        ms (int): filter time in milliseconds, 1..65535
+    """
+    i2c_hat.di.filters[index] = ms
+
+
+def restore_factory_defaults(i2c_hat):
+    """Restores every persistent register to its factory default and resets the board (CiA 301 0x1011, 'load'-guarded). The exported robotframework keyword is 'Restore Factory Defaults'.
+
+    Args:
+        i2c_hat (I2CHat): board
+    """
+    i2c_hat.restore_factory_defaults()
+
+
 def di_get_labels(i2c_hat):
     """Gets the I2C-HAT digital inputs labels. The exported robotframework keyword is 'DI Get Labels'.
 

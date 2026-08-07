@@ -214,6 +214,16 @@ class I2CHat(object):
         request = self._request_frame_(Command.RESET)
         self._transfer_(request, 0, False)
 
+    def restore_factory_defaults(self):
+        """Restores every persistent register to its factory default
+        (CiA 301 0x1011) and resets the board. Guarded by the 'load'
+        signature, so only this exact request acts. No response is sent;
+        allow ~1 s for the board to erase its EEPROM and come back up.
+        Requires firmware with CiA alignment support."""
+        request = self._request_frame_(Command.RESTORE_FACTORY_DEFAULTS,
+                                       [ord('l'), ord('o'), ord('a'), ord('d')])
+        self._transfer_(request, 0, False)
+
 class StatusWord(object):
     """Models StatusWord
 
