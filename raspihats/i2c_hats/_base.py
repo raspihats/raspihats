@@ -341,6 +341,7 @@ class Irq(Functionality):
         DI_FALLING_EDGE_CONTROL     = 0x20
         DI_RISING_EDGE_CONTROL      = 0x21
         DI_CAPTURE                  = 0x22
+        DI_GLOBAL_ENABLE            = 0x23
 
     def __init__(self, i2c_hat):
         Functionality.__init__(self, i2c_hat)

@@ -587,3 +587,11 @@ def di_get_irq_reg_capture(i2c_hat):
 
 def di_set_irq_reg_capture(i2c_hat, value):
     i2c_hat.di.irq_reg.capture = value
+
+
+def di_get_irq_reg_global_enable(i2c_hat):
+    return i2c_hat.di.irq_reg.global_enable
+
+
+def di_set_irq_reg_global_enable(i2c_hat, value):
+    i2c_hat.di.irq_reg.global_enable = value

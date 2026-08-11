@@ -57,6 +57,21 @@ class DigitalInputs(Functionality):
                     raise Exception("Value " + str(value) + " not allowed, only 0 is allowed, use 0 to clear the DI IRQ Capture Queue")
                 i2c_hat.irq.set_reg(Irq.RegName.DI_CAPTURE.value, value)
 
+            @property
+            def global_enable(self):
+                """:obj:`int`: Global interrupt enable (CiA 401 0x6005). Volatile
+                arming bit, 0 after every board reset; writing 0 disarms the
+                block, dumps the CaptureQueue and releases the IRQ line.
+                Requires firmware with IRQ-block support."""
+                return i2c_hat.irq.get_reg(Irq.RegName.DI_GLOBAL_ENABLE.value)
+
+            @global_enable.setter
+            def global_enable(self, value):
+                value = int(value)
+                if value not in (0, 1):
+                    raise ValueError("global_enable accepts only 0 or 1")
+                i2c_hat.irq.set_reg(Irq.RegName.DI_GLOBAL_ENABLE.value, value)
+
 
         class Channels(object):
             def __getitem__(self, index):
