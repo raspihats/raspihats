@@ -475,6 +475,56 @@ def restore_factory_defaults(i2c_hat):
     i2c_hat.restore_factory_defaults()
 
 
+def do_get_write_mask(i2c_hat):
+    """Gets the digital outputs write mask (CiA 401 0x6208, volatile). The exported robotframework keyword is 'DO Get Write Mask'.
+
+    Args:
+        i2c_hat (I2CHat): board
+    """
+    return i2c_hat.dq.write_mask
+
+
+def do_set_write_mask(i2c_hat, value):
+    """Sets the digital outputs write mask (CiA 401 0x6208, volatile). The exported robotframework keyword is 'DO Set Write Mask'.
+
+    Args:
+        i2c_hat (I2CHat): board
+        value (int): mask, 1 = channel obeys bulk writes
+    """
+    i2c_hat.dq.write_mask = value
+
+
+def enter_bootloader(i2c_hat):
+    """Resets the board into the ROM system bootloader ('boot'-guarded, no response). The exported robotframework keyword is 'Enter Bootloader'.
+
+    Args:
+        i2c_hat (I2CHat): board
+    """
+    i2c_hat.enter_bootloader()
+
+
+def get_config_signature(i2c_hat):
+    """Gets the configuration signature (CiA 301 0x1020). The exported robotframework keyword is 'Get Config Signature'.
+
+    Args:
+        i2c_hat (I2CHat): board
+
+    Returns:
+        int: stored signature, 0 = no claim
+    """
+    return i2c_hat.config_signature
+
+
+def set_config_signature(i2c_hat, value):
+    """Sets the configuration signature (CiA 301 0x1020). The exported robotframework keyword is 'Set Config Signature'.
+
+    Args:
+        i2c_hat (I2CHat): board
+        value (int): signature token
+    """
+    i2c_hat.config_signature = value
+
+
 def di_get_labels(i2c_hat):
     """Gets the I2C-HAT digital inputs labels. The exported robotframework keyword is 'DI Get Labels'.
 

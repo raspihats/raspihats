@@ -279,3 +279,19 @@ class DigitalOutputs(Functionality):
     def safety_mask(self, value):
         self._validate_value(value)
         self._i2c_hat._set_u32_value_(Command.DQ_SET_SAFETY_MASK, value)
+
+    @property
+    def write_mask(self):
+        """:obj:`int`: Write mask (CiA 401 0x6208), 1 bit per channel:
+        1 = the channel obeys bulk writes (dq.value), 0 = bulk writes flow
+        around it - the channel keeps its state and belongs to whoever
+        drives it via dq.channels[i] (single-channel writes bypass the
+        mask, and the Cwdt safety behavior is governed by safety_mask
+        alone). VOLATILE: all-ones after every board reset. Requires
+        firmware with 0x6208 support."""
+        return self._i2c_hat._get_u32_value_(Command.DQ_GET_WRITE_MASK)
+
+    @write_mask.setter
+    def write_mask(self, value):
+        self._validate_value(value)
+        self._i2c_hat._set_u32_value_(Command.DQ_SET_WRITE_MASK, value)

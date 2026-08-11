@@ -224,6 +224,31 @@ class I2CHat(object):
                                        [ord('l'), ord('o'), ord('a'), ord('d')])
         self._transfer_(request, 0, False)
 
+    def enter_bootloader(self):
+        """Resets into the ROM system bootloader for jumperless flashing -
+        the board re-enumerates at the ROM's I2C address (0x3E on the F0
+        boards, 0x56 on G0). Guarded by the 'boot' signature, no response
+        is sent. A full bus scan (or stm32flash -g 0) returns a lingering
+        bootloader to the application. Requires firmware with
+        ENTER_BOOTLOADER support."""
+        request = self._request_frame_(Command.ENTER_BOOTLOADER,
+                                       [ord('b'), ord('o'), ord('o'), ord('t')])
+        self._transfer_(request, 0, False)
+
+    @property
+    def config_signature(self):
+        """:obj:`int`: Configuration signature (CiA 301 0x1020)(*). The
+        firmware voids it to 0 whenever any other persistent value actually
+        changes, so a surviving non-zero signature proves the whole stored
+        configuration is untouched since the signature was written.
+        Unchanged re-writes of the same values keep it. Requires firmware
+        with 0x1020 support."""
+        return self._get_u32_value_(Command.CONFIG_GET_SIGNATURE)
+
+    @config_signature.setter
+    def config_signature(self, value):
+        self._set_u32_value_(Command.CONFIG_SET_SIGNATURE, value)
+
 class StatusWord(object):
     """Models StatusWord
 

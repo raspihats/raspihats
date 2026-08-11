@@ -144,6 +144,10 @@ board.name                    # get board name, in this case 'DI6acDQ6rly'
 board.status.value            # get status word
 board.reset()                 # reset board
 board.restore_factory_defaults()  # restore factory defaults (CiA 301 0x1011): formats the EEPROM and resets, every persistent register falls back to its default
+board.enter_bootloader()      # reset into the ROM bootloader for jumperless flashing (firmware >= the 3.1.0 series); board re-enumerates at 0x3E (F0) / 0x56 (G0)
+# ConfigSignature (CiA 301 0x1020) -- controller-owned token, persistent; the firmware voids it to 0 when any OTHER persistent value really changes
+board.config_signature        # get the stored signature, 0 = no claim
+board.config_signature = 1    # set it after a successful reconcile; identical re-writes of other values keep it
 
 # cwdt - Communication WatchDog Timer
 board.cwdt.period             # get CommunicationWatchDogTimer(CWDT) period
@@ -195,6 +199,9 @@ board.dq.safety_mask = 0x3F   # set digital output channels SafetyMask, all chan
 # Polarity (CiA 401 0x6202) -- per-bit invert applied at the pin, the bus value stays logical, persistent
 board.dq.polarity             # get digital output polarity, bit 0 represents channel 0 and so on ..
 board.dq.polarity = 0         # set digital output polarity, careful: writing this flips live pins instantly
+# WriteMask (CiA 401 0x6208, firmware >= the 3.1.0 series) -- gates BULK writes only; single-channel writes bypass it; VOLATILE: all-ones after every reset
+board.dq.write_mask           # get the write mask
+board.dq.write_mask = 0x3E    # bulk writes no longer touch channel 0 - it belongs to whoever drives dq.channels[0]
 board.dq.labels               # get digital output labels
 ```
 

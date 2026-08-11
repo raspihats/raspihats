@@ -23,6 +23,12 @@ class Command(Enum):
     IRQ_SET_REG                 = 0x17
     # CiA 301 0x1011: guarded by the 'load' signature payload
     RESTORE_FACTORY_DEFAULTS    = 0x18
+    # guarded by the 'boot' signature payload; board re-enumerates at the
+    # ROM bootloader's I2C address (0x3E on F0 boards, 0x56 on G0)
+    ENTER_BOOTLOADER            = 0x19
+    # CiA 301 0x1020 configuration signature
+    CONFIG_SET_SIGNATURE        = 0x1A
+    CONFIG_GET_SIGNATURE        = 0x1B
 
     # Digital Inputs commands
     DI_GET_ALL_CHANNEL_STATES   = 0x20
@@ -50,6 +56,9 @@ class Command(Enum):
     DQ_GET_POLARITY             = 0x39
     DQ_SET_SAFETY_MASK          = 0x3A
     DQ_GET_SAFETY_MASK          = 0x3B
+    # CiA 401 0x6208 filter mask output, volatile
+    DQ_SET_WRITE_MASK           = 0x3C
+    DQ_GET_WRITE_MASK           = 0x3D
 
 class DecodeException(Exception):
     """Raised when I2C Frame decoding fails."""
