@@ -200,6 +200,11 @@ board.dq.labels               # get digital output labels
 
 ## Change Log
 
+### v3.0.0
+  - CiA 401/301 alignment attributes: `di.polarity` (0x6002), `di.filters` (0x6003), `dq.polarity` (0x6202), `dq.safety_mask` (0x6206), `restore_factory_defaults()` (0x1011)
+  - IRQ block support for DI-board firmware 3.0.0: `di.irq_reg.global_enable` (CiA 401 0x6005) plus the matching robotframework keywords
+  - README: IRQ examples for both firmware generations (single-threaded `wait_for_edge` loop for firmware >= 3.0.0, callback + queue pattern for older firmware), attribute listing extended with the CiA registers
+
 ### v2.5.0
   - Added support for new board, DQ5rly I2C-HAT
 
