@@ -133,6 +133,61 @@ finally:
     GPIO.cleanup()
 ```
 
+## Firmware update without a jumper(from library v3.1.0)
+
+> Requires firmware from the 3.1.0 series. Before that, updating meant fitting the board's BOOT jumper by hand — which means opening the enclosure and, for a board already wired into a panel, taking it out of service.
+
+`enter_bootloader()` resets the board into its ROM system bootloader over I2C, so a HAT can be updated in place — no jumper, no disassembly, nothing to touch. The board leaves its application address and re-enumerates at the ROM's address (**0x3E** on the STM32F0 boards), where `stm32flash` writes the new firmware and `-g 0` starts it again:
+
+```
+from raspihats.i2c_hats import DI6acDQ6rly
+
+board = DI6acDQ6rly(0x60)
+print(board.name, board.fw_version)
+board.enter_bootloader()      # 'boot'-guarded, no response is sent
+```
+
+```
+# the board is now the ROM bootloader at 0x3E
+stm32flash -w di6acdq6rly-3.1.0.bin -v -g 0 -a 0x3E /dev/i2c-1
+```
+
+Minimum firmware version per board, since the command is not in older firmware:
+
+| Board | ENTER_BOOTLOADER from |
+|---|---|
+| DI16ac | **3.1.1** (3.1.0 answered the command but did not enter the bootloader) |
+| DI6acDQ6rly | 3.1.0 |
+| DQ5rly | 1.3.0 |
+| DQ10rly | 2.4.0 |
+
+Notes:
+- A board sitting in the bootloader returns to its application on `stm32flash -g 0`, or after a full I2C bus scan.
+- Do not run `i2cdetect` between entering the bootloader and flashing — a scan can return the board to the application mid-procedure.
+- Disconnect whatever is wired to the inputs and outputs first: the outputs are reset while the new firmware starts.
+
+## Configuration signature(from library v3.1.0)
+
+`config_signature` (CiA 301 0x1020) turns "is this board still configured the way I left it?" into a single read. The controller writes any token it likes after a successful commissioning pass; the firmware voids it to 0 the moment any *other* persistent value really changes, so a surviving token proves the whole stored configuration is intact. Re-writing identical values keeps it.
+
+```
+from raspihats.i2c_hats import DI6acDQ6rly
+
+PROJECT_REVISION = 0x00010004
+board = DI6acDQ6rly(0x60)
+
+if board.config_signature != PROJECT_REVISION:
+    # full reconcile - every persistent register read, compared, written if different
+    board.di.polarity = 0x00
+    board.di.filters[0] = 5
+    board.dq.safety_mask = 0x3F
+    board.dq.safety_value = 0x00
+    board.cwdt.period = 2
+    board.config_signature = PROJECT_REVISION   # claim it, last
+```
+
+Steady state then costs one read instead of a dozen. `restore_factory_defaults()` wipes the signature along with everything else, and 0 means "no claim" — a board that was never commissioned and one whose configuration moved read the same.
+
 ## Listing attributes and methods(from v2.0.0)
 
 ```
@@ -206,6 +261,13 @@ board.dq.labels               # get digital output labels
 ```
 
 ## Change Log
+
+### v3.1.0
+  - `enter_bootloader()` (0x19): resets the board into its ROM system bootloader over I2C, so firmware can be updated in place without fitting the BOOT jumper — see the section above for the procedure and the minimum firmware version per board
+  - `config_signature` (CiA 301 0x1020): controller-owned persistent token, voided by the firmware whenever another persistent value really changes, so a steady-state configuration check is one read
+  - `dq.write_mask` (CiA 401 0x6208): gates bulk output writes only — single-channel writes bypass it and the CWDT safety behavior stays governed by `dq.safety_mask`; volatile, all-ones after every board reset
+  - robotframework keywords for all three
+  - README: worked examples for jumperless firmware update and for the configuration-signature reconcile
 
 ### v3.0.0
   - CiA 401/301 alignment attributes: `di.polarity` (0x6002), `di.filters` (0x6003), `dq.polarity` (0x6202), `dq.safety_mask` (0x6206), `restore_factory_defaults()` (0x1011)
