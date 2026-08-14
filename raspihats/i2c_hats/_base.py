@@ -5,11 +5,13 @@ import sys
 import time
 import smbus2
 import threading
-try:
-  from enum import Enum
-except ImportError:
-  from enum34 import Enum
-from ._frame import Command, Frame, DecodeException
+from ..protocol import (
+    Command, Frame, DecodeException,
+    StatusWordBits, IrqRegister,
+    FRAME_ID_MASK,
+    CWDT_PERIOD_DISABLED, CWDT_PERIOD_MAX,
+    RESTORE_FACTORY_DEFAULTS_SIGNATURE, ENTER_BOOTLOADER_SIGNATURE,
+)
 
 class ResponseException(Exception):
     """Raised when there's a problem with the I2C-HAT response."""
@@ -47,7 +49,9 @@ class I2CHat(object):
             if not 0 <= address <= 127:
                 raise ValueError("I2C address should be in range[0, 127]")
         else:
-            if address & base_address != base_address:
+            # NOTE: a bitwise test passes addresses outside the family window
+            # (0x70 & 0x50 == 0x50), so the range is checked directly.
+            if not base_address <= address <= base_address + 0x0F:
                 raise ValueError("I2C address should be in range[" + hex(base_address) + ", " + hex(base_address + 0x0F) + "]")
 
         if board_name != None:
@@ -70,7 +74,7 @@ class I2CHat(object):
 
         """
         self._frame_id += 1
-        self._frame_id &= 0x7F
+        self._frame_id &= FRAME_ID_MASK
         return self._frame_id
 
     def _transfer_(self, request_frame, response_data_size, response_expected=True, number_of_tries=5):
@@ -202,7 +206,12 @@ class I2CHat(object):
         request = self._request_frame_(Command.GET_FIRMWARE_VERSION)
         response = self._transfer_(request, 3)
         data = response.data
-        return 'v' + chr(data[0] + 0x30) + '.' + chr(data[1] + 0x30)  + '.' + chr(data[2] + 0x30)
+        if len(data) != 3:
+            raise ResponseException('invalid response data length')
+        # NOTE: the three bytes are major, minor and patch as integers, so
+        # they are formatted as numbers - a char-offset render would print
+        # v2.10.0 as 'v2:0'.
+        return 'v%d.%d.%d' % (data[0], data[1], data[2])
 
     @property
     def status(self):
@@ -221,7 +230,7 @@ class I2CHat(object):
         allow ~1 s for the board to erase its EEPROM and come back up.
         Requires firmware with CiA alignment support."""
         request = self._request_frame_(Command.RESTORE_FACTORY_DEFAULTS,
-                                       [ord('l'), ord('o'), ord('a'), ord('d')])
+                                       list(RESTORE_FACTORY_DEFAULTS_SIGNATURE))
         self._transfer_(request, 0, False)
 
     def enter_bootloader(self):
@@ -232,7 +241,7 @@ class I2CHat(object):
         bootloader to the application. Requires firmware with
         ENTER_BOOTLOADER support."""
         request = self._request_frame_(Command.ENTER_BOOTLOADER,
-                                       [ord('b'), ord('o'), ord('o'), ord('t')])
+                                       list(ENTER_BOOTLOADER_SIGNATURE))
         self._transfer_(request, 0, False)
 
     @property
@@ -259,13 +268,9 @@ class StatusWord(object):
         value (int): StatusWord integer value.
     """
 
-    class Bits(Enum):
-        """StatusWord bit masks"""
-        POR_RESET = 0x01
-        SOFT_RESET = 0x02
-        IWD_RESET = 0x04
-        CWDT_TIMEOUT = 0x08
-        DI_IRQ_CAPTURE_QUEUE_FULL = 0x10
+    #: StatusWord bit masks. Defined in :class:`raspihats.protocol.StatusWordBits`;
+    #: kept here as an alias so ``StatusWord.Bits`` keeps working.
+    Bits = StatusWordBits
 
     def __init__(self, value):
         self.value = value
@@ -273,10 +278,9 @@ class StatusWord(object):
     @property
     def bits(self):
         """:obj:`dict`: StatusWord bit values dictinary."""
-        d = dict()
-        for bit in self.Bits:
-            d[str(bit).replace("Bits.","")] = (self.value & bit.value) != 0x0
-        return d
+        # NOTE: keyed by the member name itself. A str()-and-strip-the-prefix
+        # approach breaks the moment the enum is renamed or moved.
+        return dict((bit.name, (self.value & bit.value) != 0x0) for bit in self.Bits)
 
     def __str__(self):
         """Human readable string describing the StatusWord."""
@@ -313,7 +317,7 @@ class Functionality(object):
             except ValueError:
                 raise ValueError("'" + label + "' is not a valid channel label")
         else:
-            raise ValueError("index type is '" + type(index) + "', expecting 'int' or 'str'")
+            raise ValueError("index type is '" + type(index).__name__ + "', expecting 'int' or 'str'")
         return index
 
     def _validate_value(self, value):
@@ -341,14 +345,22 @@ class Cwdt(Functionality):
 
     @property
     def period(self):
-        """:obj:`float`: The CommunicationWatchdogTimer period value in seconds(*)."""
+        """:obj:`float`: The CommunicationWatchdogTimer period value in seconds(*).
+
+        The wire field is unsigned 32-bit **milliseconds** and is persistent;
+        this property is the seconds-valued view of it. Writing 0 disables the
+        watchdog.
+        """
         return float(self._i2c_hat._get_u32_value_(Command.CWDT_GET_PERIOD)) / 1000
 
     @period.setter
     def period(self, value):
         if value < 0:
             raise ValueError("period should be greather than zero to enable the CommunicationWatchdogTimer on the I2C-HAT board")
-        self._i2c_hat._set_u32_value_(Command.CWDT_SET_PERIOD, int(value * 1000))
+        ms = int(value * 1000)
+        if not CWDT_PERIOD_DISABLED <= ms <= CWDT_PERIOD_MAX:
+            raise ValueError("period should be at most " + str(CWDT_PERIOD_MAX / 1000) + " seconds, the u32 wire field would overflow")
+        self._i2c_hat._set_u32_value_(Command.CWDT_SET_PERIOD, ms)
 
 
 class Irq(Functionality):
@@ -361,12 +373,9 @@ class Irq(Functionality):
 
     """
 
-    class RegName(Enum):
-        """IRQ registers"""
-        DI_FALLING_EDGE_CONTROL     = 0x20
-        DI_RISING_EDGE_CONTROL      = 0x21
-        DI_CAPTURE                  = 0x22
-        DI_GLOBAL_ENABLE            = 0x23
+    #: IRQ sub-registers. Defined in :class:`raspihats.protocol.IrqRegister`;
+    #: kept here as an alias so ``Irq.RegName`` keeps working.
+    RegName = IrqRegister
 
     def __init__(self, i2c_hat):
         Functionality.__init__(self, i2c_hat)

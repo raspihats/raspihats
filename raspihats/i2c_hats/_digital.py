@@ -1,9 +1,5 @@
-from ._frame import Command
-from ._base import ResponseException, Functionality, Irq
-try:
-  from enum import Enum
-except ImportError:
-  from enum34 import Enum
+from ..protocol import Command, CounterType, IrqRegister
+from ._base import ResponseException, Functionality
 
 
 class DigitalInputs(Functionality):
@@ -29,33 +25,33 @@ class DigitalInputs(Functionality):
             @property
             def rising_edge_control(self):
                 """:obj:`int`: The value of all IRQ Control reg, 1 bit represents 1 channel."""
-                return i2c_hat.irq.get_reg(Irq.RegName.DI_RISING_EDGE_CONTROL.value)
+                return i2c_hat.irq.get_reg(IrqRegister.DI_RISING_EDGE_CONTROL.value)
 
             @rising_edge_control.setter
             def rising_edge_control(self, value):
                 outer_instance._validate_value(value)
-                i2c_hat.irq.set_reg(Irq.RegName.DI_RISING_EDGE_CONTROL.value, value)
+                i2c_hat.irq.set_reg(IrqRegister.DI_RISING_EDGE_CONTROL.value, value)
 
             @property
             def falling_edge_control(self):
                 """:obj:`int`: The value of all IRQ Control reg, 1 bit represents 1 channel."""
-                return i2c_hat.irq.get_reg(Irq.RegName.DI_FALLING_EDGE_CONTROL.value)
+                return i2c_hat.irq.get_reg(IrqRegister.DI_FALLING_EDGE_CONTROL.value)
 
             @falling_edge_control.setter
             def falling_edge_control(self, value):
                 outer_instance._validate_value(value)
-                i2c_hat.irq.set_reg(Irq.RegName.DI_FALLING_EDGE_CONTROL.value, value)
+                i2c_hat.irq.set_reg(IrqRegister.DI_FALLING_EDGE_CONTROL.value, value)
 
             @property
             def capture(self):
                 """:obj:`int`: The value of all IRQ Control reg, 1 bit represents 1 channel."""
-                return i2c_hat.irq.get_reg(Irq.RegName.DI_CAPTURE.value)
+                return i2c_hat.irq.get_reg(IrqRegister.DI_CAPTURE.value)
 
             @capture.setter
             def capture(self, value):
                 if value != 0:
                     raise Exception("Value " + str(value) + " not allowed, only 0 is allowed, use 0 to clear the DI IRQ Capture Queue")
-                i2c_hat.irq.set_reg(Irq.RegName.DI_CAPTURE.value, value)
+                i2c_hat.irq.set_reg(IrqRegister.DI_CAPTURE.value, value)
 
             @property
             def global_enable(self):
@@ -63,14 +59,14 @@ class DigitalInputs(Functionality):
                 arming bit, 0 after every board reset; writing 0 disarms the
                 block, dumps the CaptureQueue and releases the IRQ line.
                 Requires firmware with IRQ-block support."""
-                return i2c_hat.irq.get_reg(Irq.RegName.DI_GLOBAL_ENABLE.value)
+                return i2c_hat.irq.get_reg(IrqRegister.DI_GLOBAL_ENABLE.value)
 
             @global_enable.setter
             def global_enable(self, value):
                 value = int(value)
                 if value not in (0, 1):
                     raise ValueError("global_enable accepts only 0 or 1")
-                i2c_hat.irq.set_reg(Irq.RegName.DI_GLOBAL_ENABLE.value, value)
+                i2c_hat.irq.set_reg(IrqRegister.DI_GLOBAL_ENABLE.value, value)
 
 
         class Channels(object):
@@ -88,7 +84,8 @@ class DigitalInputs(Functionality):
 
         class Counters(object):
             def __init__(self, counter_type):
-                self.__counter_type = counter_type
+                # the wire carries the raw selector byte, not the enum member
+                self.__counter_type = CounterType(counter_type).value
 
             def __getitem__(self, index):
                 index = outer_instance._validate_channel_index(index)
@@ -140,8 +137,8 @@ class DigitalInputs(Functionality):
                 return len(outer_instance.labels)
 
         self.channels = Channels()
-        self.r_counters = Counters(1)
-        self.f_counters = Counters(0)
+        self.r_counters = Counters(CounterType.RISING)
+        self.f_counters = Counters(CounterType.FALLING)
         self.irq_reg = IRQReg()
         self.filters = Filters()
 

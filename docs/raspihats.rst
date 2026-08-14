@@ -12,6 +12,17 @@ Subpackages
 Submodules
 ----------
 
+raspihats.protocol module
+-------------------------
+
+Public wire-protocol surface - see :doc:`protocol` for the transport
+contract and the stability commitment.
+
+.. automodule:: raspihats.protocol
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 raspihats.crc16 module
 ----------------------
 

@@ -1,18 +1,25 @@
 """
 This module contains the I2C-HATs classes.
 """
+import smbus2
+from ..protocol import BOARDS
 from ._base import I2CHat, Cwdt, Irq, ResponseException
 from ._digital import DigitalOutputs, DigitalInputs
 
 def set_i2c_port(i2c_port):
     """Set the I2C port number.
 
+    The bus is process-wide state shared by every I2CHat instance, so this
+    has to be called before the first board is constructed.
+
     Args:
         i2c_port (int): I2C port number
 
     """
-    import smbus
-    I2CHat._i2c_bus = smbus.SMBus(i2c_port)
+    if I2CHat._i2c_bus is not None:
+        I2CHat._i2c_bus.close()
+    I2CHat.I2C_PORT = i2c_port
+    I2CHat._i2c_bus = smbus2.SMBus(i2c_port)
 
 class Di16(I2CHat):
     """This class exposes all operations supported by the Di16 I2C-HAT.
@@ -26,14 +33,10 @@ class Di16(I2CHat):
 
     """
 
-    _BASE_ADDRESS = 0x40
-    _BOARD_NAME = 'Di16 I2C-HAT'
-    _labels = [
-        'Di1.1', 'Di1.2', 'Di1.3', 'Di1.4',
-        'Di2.1', 'Di2.2', 'Di2.3', 'Di2.4',
-        'Di3.1', 'Di3.2', 'Di3.3', 'Di3.4',
-        'Di4.1', 'Di4.2', 'Di4.3', 'Di4.4',
-    ]
+    _INFO = BOARDS['Di16']
+    _BASE_ADDRESS = _INFO.base_address
+    _BOARD_NAME = _INFO.board_name
+    _labels = list(_INFO.labels['di'])
 
     def __init__(self, address):
         I2CHat.__init__(self, address, self._BASE_ADDRESS, self._BOARD_NAME)
@@ -51,9 +54,10 @@ class Rly10(I2CHat):
         dq (:obj:`raspihats.i2c_hats._digital.DigitalOutputs`): provides access to DigitalOutputs.
     """
 
-    _BASE_ADDRESS = 0x50
-    _BOARD_NAME = 'Rly10 I2C-HAT'
-    _labels = ['Rly1', 'Rly2', 'Rly3', 'Rly4', 'Rly5', 'Rly6', 'Rly7', 'Rly8', 'Rly9', 'Rly10']
+    _INFO = BOARDS['Rly10']
+    _BASE_ADDRESS = _INFO.base_address
+    _BOARD_NAME = _INFO.board_name
+    _labels = list(_INFO.labels['dq'])
 
     def __init__(self, address):
         I2CHat.__init__(self, address, self._BASE_ADDRESS, self._BOARD_NAME)
@@ -73,10 +77,11 @@ class Di6Rly6(I2CHat):
 
     """
 
-    _BASE_ADDRESS = 0x60
-    _BOARD_NAME = 'Di6Rly6 I2C-HAT'
-    _di_labels = ['Di1.1', 'Di1.2', 'Di1.3', 'Di1.4', 'Di1.5', 'Di1.6']
-    _dq_labels = ['Rly1', 'Rly2', 'Rly3', 'Rly4', 'Rly5', 'Rly6']
+    _INFO = BOARDS['Di6Rly6']
+    _BASE_ADDRESS = _INFO.base_address
+    _BOARD_NAME = _INFO.board_name
+    _di_labels = list(_INFO.labels['di'])
+    _dq_labels = list(_INFO.labels['dq'])
 
     def __init__(self, address):
         I2CHat.__init__(self, address, self._BASE_ADDRESS, self._BOARD_NAME)
@@ -96,9 +101,10 @@ class DI16ac(I2CHat):
 
     """
 
-    _BASE_ADDRESS = 0x40
-    _BOARD_NAME = 'DI16ac I2C-HAT'
-    _labels = ['I0', 'I1', 'I2', 'I3', 'I4', 'I5', 'I6', 'I7', 'I8', 'I9', 'I10', 'I11', 'I12', 'I13', 'I14', 'I15']
+    _INFO = BOARDS['DI16ac']
+    _BASE_ADDRESS = _INFO.base_address
+    _BOARD_NAME = _INFO.board_name
+    _labels = list(_INFO.labels['di'])
 
 
     def __init__(self, address):
@@ -118,9 +124,10 @@ class DQ16oc(I2CHat):
         dq (:obj:`raspihats.i2c_hats._digital.DigitalOutputs`): provides access to DigitalOutputs.
     """
 
-    _BASE_ADDRESS = 0x50
-    _BOARD_NAME = 'DQ16oc I2C-HAT'
-    _labels = ['Q0', 'Q1', 'Q2', 'Q3', 'Q4', 'Q5', 'Q6', 'Q7', 'Q8', 'Q9', 'Q10', 'Q11', 'Q12', 'Q13', 'Q14', 'Q15']
+    _INFO = BOARDS['DQ16oc']
+    _BASE_ADDRESS = _INFO.base_address
+    _BOARD_NAME = _INFO.board_name
+    _labels = list(_INFO.labels['dq'])
 
     def __init__(self, address):
         I2CHat.__init__(self, address, self._BASE_ADDRESS, self._BOARD_NAME)
@@ -138,9 +145,10 @@ class DQ10rly(I2CHat):
         dq (:obj:`raspihats.i2c_hats._digital.DigitalOutputs`): provides access to DigitalOutputs.
     """
 
-    _BASE_ADDRESS = 0x50
-    _BOARD_NAME = 'DQ10rly I2C-HAT'
-    _labels = ['Q0', 'Q1', 'Q2', 'Q3', 'Q4', 'Q5', 'Q6', 'Q7', 'Q8', 'Q9']
+    _INFO = BOARDS['DQ10rly']
+    _BASE_ADDRESS = _INFO.base_address
+    _BOARD_NAME = _INFO.board_name
+    _labels = list(_INFO.labels['dq'])
 
     def __init__(self, address):
         I2CHat.__init__(self, address, self._BASE_ADDRESS, self._BOARD_NAME)
@@ -158,9 +166,10 @@ class DQ8rly(I2CHat):
         dq (:obj:`raspihats.i2c_hats._digital.DigitalOutputs`): provides access to DigitalOutputs.
     """
 
-    _BASE_ADDRESS = 0x50
-    _BOARD_NAME = 'DQ8rly I2C-HAT'
-    _labels = ['Q0', 'Q1', 'Q2', 'Q3', 'Q4', 'Q5', 'Q6', 'Q7']
+    _INFO = BOARDS['DQ8rly']
+    _BASE_ADDRESS = _INFO.base_address
+    _BOARD_NAME = _INFO.board_name
+    _labels = list(_INFO.labels['dq'])
 
     def __init__(self, address):
         I2CHat.__init__(self, address, self._BASE_ADDRESS, self._BOARD_NAME)
@@ -178,9 +187,10 @@ class DQ5rly(I2CHat):
         dq (:obj:`raspihats.i2c_hats._digital.DigitalOutputs`): provides access to DigitalOutputs.
     """
 
-    _BASE_ADDRESS = 0x50
-    _BOARD_NAME = 'DQ5rly I2C-HAT'
-    _labels = ['Q0', 'Q1', 'Q2', 'Q3', 'Q4']
+    _INFO = BOARDS['DQ5rly']
+    _BASE_ADDRESS = _INFO.base_address
+    _BOARD_NAME = _INFO.board_name
+    _labels = list(_INFO.labels['dq'])
 
     def __init__(self, address):
         I2CHat.__init__(self, address, self._BASE_ADDRESS, self._BOARD_NAME)
@@ -200,10 +210,11 @@ class DI6acDQ6rly(I2CHat):
 
     """
 
-    _BASE_ADDRESS = 0x60
-    _BOARD_NAME = 'DI6acDQ6rly I2C-HAT'
-    _di_labels = ['I0', 'I1', 'I2', 'I3', 'I4', 'I5']
-    _dq_labels = ['Q0', 'Q1', 'Q2', 'Q3', 'Q4', 'Q5']
+    _INFO = BOARDS['DI6acDQ6rly']
+    _BASE_ADDRESS = _INFO.base_address
+    _BOARD_NAME = _INFO.board_name
+    _di_labels = list(_INFO.labels['di'])
+    _dq_labels = list(_INFO.labels['dq'])
 
     def __init__(self, address):
         I2CHat.__init__(self, address, self._BASE_ADDRESS, self._BOARD_NAME)
@@ -225,10 +236,11 @@ class DI6acDQ6ssr(I2CHat):
 
     """
 
-    _BASE_ADDRESS = 0x60
-    _BOARD_NAME = 'DI6acDQ6ssr I2C-HAT'
-    _di_labels = ['I0', 'I1', 'I2', 'I3', 'I4', 'I5']
-    _dq_labels = ['Q0', 'Q1', 'Q2', 'Q3', 'Q4', 'Q5']
+    _INFO = BOARDS['DI6acDQ6ssr']
+    _BASE_ADDRESS = _INFO.base_address
+    _BOARD_NAME = _INFO.board_name
+    _di_labels = list(_INFO.labels['di'])
+    _dq_labels = list(_INFO.labels['dq'])
 
     def __init__(self, address):
         I2CHat.__init__(self, address, self._BASE_ADDRESS, self._BOARD_NAME)
@@ -251,10 +263,11 @@ class DI6dwDQ6ssr(I2CHat):
 
     """
 
-    _BASE_ADDRESS = 0x60
-    _BOARD_NAME = 'DI6dwDQ6ssr I2C-HAT'
-    _di_labels = ['I0', 'I1', 'I2', 'I3', 'I4', 'I5']
-    _dq_labels = ['Q0', 'Q1', 'Q2', 'Q3', 'Q4', 'Q5']
+    _INFO = BOARDS['DI6dwDQ6ssr']
+    _BASE_ADDRESS = _INFO.base_address
+    _BOARD_NAME = _INFO.board_name
+    _di_labels = list(_INFO.labels['di'])
+    _dq_labels = list(_INFO.labels['dq'])
 
     def __init__(self, address):
         I2CHat.__init__(self, address, self._BASE_ADDRESS, self._BOARD_NAME)

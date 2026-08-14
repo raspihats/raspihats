@@ -262,6 +262,19 @@ board.dq.labels               # get digital output labels
 
 ## Change Log
 
+### v3.2.0
+  - **`raspihats.protocol`: a public, semver-stable wire-protocol surface.** `Command`, `Frame`, `DecodeException` and `crc16_modbus`, plus the protocol semantics that were previously buried in private modules — `StatusWordBits`, `IrqRegister`, `CounterType`, the CWDT wire unit and limits, and the `'load'` / `'boot'` guard payloads. It performs no I/O and does not import `smbus2`, so it can be used off-machine and by other transports. See `docs/protocol.rst` for the transport contract and the stability commitment.
+  - `RESPONSE_DATA_SIZE`: the per-command response payload size, previously scattered as literals through the code. A transport has to know the size before it reads, so this is part of the contract.
+  - `BOARDS` / `BoardInfo`: inert per-model capability data — reported name, base address, address range, per-section channel labels, `has_cwdt`, `has_irq`. Usable without a bus, which is what validating a configuration before touching hardware needs. The board classes now take their address, name and labels from this table, so the two cannot drift apart.
+  - **Fix:** `Frame.decode()` raises `DecodeException` instead of `IndexError` on a short read, so a truncated response is retried like any other bad frame rather than escaping the retry loop as a crash.
+  - **Fix:** the I2C address range check accepted addresses outside the family window — a bitwise test let `0x70` pass for a `0x50`-based board.
+  - **Fix:** `fw_version` rendered any component above 9 as punctuation; v2.10.0 came out as `v2:0`.
+  - **Fix:** `set_i2c_port()` imported `smbus`, which is not a declared dependency, and did not take effect; it now uses `smbus2` and replaces the open bus.
+  - **Fix:** `cwdt.period` accepted values that overflow the u32 wire field.
+  - **Fix:** `Frame`'s payload default was a shared mutable list, and an invalid channel index raised a `TypeError` while building its own error message.
+  - `tests/`: a unit suite for the protocol surface — golden frame vectors cross-checked against an independent CRC implementation, the decode failure modes, and the board data. No hardware needed.
+  - `raspihats.i2c_hats._frame` is now a compatibility re-export; `StatusWord.Bits` and `Irq.RegName` are aliases of the public enums. Nothing existing breaks.
+
 ### v3.1.0
   - `enter_bootloader()` (0x19): resets the board into its ROM system bootloader over I2C, so firmware can be updated in place without fitting the BOOT jumper — see the section above for the procedure and the minimum firmware version per board
   - `config_signature` (CiA 301 0x1020): controller-owned persistent token, voided by the firmware whenever another persistent value really changes, so a steady-state configuration check is one read
